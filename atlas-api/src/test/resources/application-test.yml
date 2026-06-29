@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+atlas:
+  admin:
+    username: admin
+    password: test_password
+  jwt:
+    secret: test_jwt_secret_minimum_32_characters_long
+    expiration-hours: 1
+  cors:
+    allowed-origins:
+      - http://localhost:4200
