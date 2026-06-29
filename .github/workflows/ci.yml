@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feature/**", "fix/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+
+  # ── Stage 0: Secrets scan ────────────────────────────────────────────────────
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Stage 1: Test Java modules (parallel) ───────────────────────────────────
+  test-api:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Run tests + coverage gate (atlas-api)
+        run: ./mvnw -pl atlas-api verify -P ci
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: atlas-api/target/site/jacoco/
+          retention-days: 14
+
+  test-scraper:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Run tests + coverage gate (atlas-scraper)
+        run: ./mvnw -pl atlas-scraper verify -P ci
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-coverage
+          path: atlas-scraper/target/site/jacoco/
+          retention-days: 14
+
+  # ── Stage 2: Lightweight security scan ──────────────────────────────────────
+  security-scan:
+    needs: [test-api, test-scraper]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy SCA — atlas-api
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: atlas-api
+          severity: CRITICAL,HIGH
+          exit-code: 0
+          format: table
+      - name: Trivy SCA — atlas-scraper
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: atlas-scraper
+          severity: CRITICAL,HIGH
+          exit-code: 0
+          format: table
