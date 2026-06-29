@@ -63,6 +63,12 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
+        <!-- RabbitMQ consumer (Story 2.5) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
         <!-- iCal feed generation (Story 1.5) -->
         <dependency>
             <groupId>org.mnode.ical4j</groupId>

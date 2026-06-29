@@ -19,3 +19,31 @@ Branch `feature/sprint-1-api-foundation` pushed to origin.
 PR: https://github.com/rhorba/atlas-events/pull/new/feature/sprint-1-api-foundation
 **Next session**: Sprint 2 — Event detail API (Story 1.4), iCal feed (Story 1.5), Submission API (Story 1.6), Admin Auth JWT (Story 1.7).
 **Branch**: still on `feature/sprint-1-api-foundation` — merge to master or start `feature/sprint-2-api-complete`
+
+## SESSION_START — 2026-06-29 (Session 3 — context resumed)
+Sprint 2 continuation. Auth files were partially written in session 2.
+
+## SESSION_END — 2026-06-29 (Session 3)
+**What was done**: Sprint 2 fully complete.
+- Story 1.5: GET /ical (ical4j 3.2.14, Africa/Casablanca, optional city/category filter)
+- Story 1.6: POST /api/v1/submissions (Bucket4j 10/hr IP rate limit, Retry-After header, contactEmail never in response)
+- Story 1.7: POST /api/v1/auth/login (JJWT 0.12.x HS256, 1hr TTL); JwtAuthFilter guards /api/v1/admin/**; custom 401 entry point
+- SecurityConfig updated; AtlasApiApplication excludes UserDetailsServiceAutoConfiguration
+- V005 migration replaces event_submissions table with correct schema
+- 22 tests pass (5 unit + 17 integration); coverage gate met (≥80%)
+- Pushed: `feature/sprint-1-api-foundation` commit b181036
+**Bugs fixed**: StaleObjectStateException (removed @GeneratedValue from pre-set UUID entity); schema mismatch (V005 migration)
+**Next session**: Sprint 3 — atlas-scraper Spring Batch pipeline, Angular frontend scaffold.
+
+## SESSION_START — 2026-06-29 (Session 4 — context resumed)
+Sprint 3 execution. Resuming from batch schema error (batch.BATCH_JOB_INSTANCE not found).
+
+## SESSION_END — 2026-06-29 (Session 4)
+**What was done**: Sprint 3 complete.
+- Story 2.1: Spring Batch 5 job infra (ScraperJobConfig, ScrapeTasklet) + RabbitMQ (DIRECT exchange `events`, queues: events.scraped, scrape.results, events.dead DLQ)
+- Story 2.2: TentimesScraper (Jsoup, .event-item CSS selectors, normalizeCategory, RobotsChecker guard)
+- Story 2.3: AllConferenceAlertScraper (table.conf-table tr.conf-row selectors, MMMM d yyyy date format)
+- batch-tables.sql: full Spring Batch DDL in `batch` schema (was missing — initialize-schema:always doesn't schema-qualify tables)
+- 41 tests pass (39 unit + 2 IT with Testcontainers PG+RabbitMQ); coverage gate met (≥80%)
+**Bugs fixed**: batch.BATCH_JOB_INSTANCE not found — Spring Batch initialize-schema:always creates tables in public schema, not in the custom `batch` schema. Fixed by switching to initialize-schema:never + explicit batch-tables.sql in spring.sql.init.
+**Next session**: Sprint 4 — atlas-api ScrapedEventConsumer (persist scraped events), Angular frontend scaffold.
