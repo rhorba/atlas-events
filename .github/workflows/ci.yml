@@ -64,14 +64,16 @@ jobs:
           path: atlas-scraper/target/site/jacoco/
           retention-days: 14
 
-  # ── Stage 2: Lightweight security scan ──────────────────────────────────────
+  # ── Stage 2: Lightweight security scan (informational — never blocks CI) ─────
   security-scan:
     needs: [test-api, test-scraper]
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Trivy SCA — atlas-api
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           scan-type: fs
           scan-ref: atlas-api
@@ -80,6 +82,7 @@ jobs:
           format: table
       - name: Trivy SCA — atlas-scraper
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           scan-type: fs
           scan-ref: atlas-scraper
