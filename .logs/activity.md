@@ -80,6 +80,22 @@ HANDOFF: DevOps/DevSecOps → Scrum Master + Test Architect
 All 10 docs approved. git init → commit 99df1fe → pushed to https://github.com/rhorba/atlas-events (branch: master).
 21 files committed: 10 docs + .env.example + 8 log files + CLAUDE.md + README.md. CI: not yet configured (Sprint 8).
 
+## 2026-06-29 — PHASE: SHIP (Sprint 4 — Scraper expansion + admin endpoints)
+**Branch**: feature/sprint-4
+**Stories**: 2.4 (PcnsScraper), 2.5 (dedup RabbitMQ consumer), 2.6 (scrape log + admin trigger)
+- `PcnsScraper`: Jsoup `article.pcns-event` selectors, `dd/MM/yyyy` French locale, strategy normalizeCategory
+- `ScraperJobConfig`: 3-step Spring Batch job (tentimesStep → allConferenceAlertStep → pcnsStep)
+- `ScrapedEventConsumer`: validates title/startDate/city, calls `saveScrapedEvent` with `ON CONFLICT DO NOTHING`, logs insert vs duplicate
+- `RabbitMQConfig`: retry interceptor (3 attempts, 2× backoff, DLQ); `rabbitListenerContainerFactory` guarded with `@ConditionalOnBean(ConnectionFactory.class)` so test profile works
+- `ScrapeResultConsumer`: receives `ScrapeResultMessage` from scraper, persists `ScrapeLog` via JPA adapter
+- `AdminScrapeController`: `POST /api/v1/admin/scrape/trigger` (202) + `GET /api/v1/admin/scrape/logs?source=&limit=` (JWT-protected)
+- `TestMessagingConfig`: test-profile `@Configuration` providing mock `RabbitTemplate` for all ITs without RabbitMQ Testcontainers
+- **Tests**: atlas-scraper 52 unit+IT all pass; atlas-api 29 unit+IT all pass
+- **Coverage**: both modules ≥ 80% — `All coverage checks have been met` ✓
+- **Push**: `git push origin feature/sprint-4` ✓ — branch visible at github.com/rhorba/atlas-events
+- **.env.example**: added TENTIMES_URL, ALL_CONFERENCE_ALERT_URL, PCNS_URL, HTTP_TIMEOUT_MS, ROBOTS_CHECK_ENABLED
+- **Gaps noted for upcoming sprints**: login rate limiting (Story 1.7 AC: 10 failed → 429); GET /api/v1/admin/submissions endpoint (Story 1.7 + 4.2)
+
 ## 2026-06-29 — PHASE: EXECUTE (Doc 09/10)
 HANDOFF: Test Architect → DevOps/DevSecOps
 **MILESTONE**: DevOps Foundation drafted → docs/devops-atlas-events.md + .env.example
