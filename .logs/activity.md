@@ -1,5 +1,22 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-29 — PHASE: EXECUTE → SHIP (Sprint 1)
+**Stories**: 1.1 (Maven scaffold), 1.2 (Flyway migrations), 1.3 (Event list API)
+**Milestone**: Sprint 1 code complete — atlas-api foundation + event list endpoint
+- Root pom.xml (parent, Java 21, Spring Boot 3.4.1, Testcontainers BOM)
+- atlas-api: Web, JPA, Security, Validation, Flyway, Actuator, Prometheus
+- atlas-scraper: minimal scaffold (Web + Actuator), Spring Batch added Sprint 3
+- Flyway migrations V001–V004: events, event_submissions, scrape_logs, batch schema
+- Hexagonal architecture: Event domain record + EventRepository port + EventService + EventRepositoryAdapter + JPA Specifications (avoids PostgreSQL null-type-inference bug)
+- GET /api/v1/events (city, category, range, page, size filters) + GET /api/v1/events/{id}
+- SecurityConfig: public routes permit, admin routes deny (JWT auth wired Sprint 2)
+- docker-compose.yml: postgres:16-alpine + rabbitmq:3-management-alpine
+- Maven Wrapper (mvnw) added for reproducible builds
+- **Tests**: 15 total (7 unit EventServiceTest + 8 integration EventControllerIT + GlobalExceptionHandlerIT via Testcontainers PostgreSQL)
+- **Coverage**: 89% instruction (gate: 80%) — CI profile verified ✓
+- **Bug fixed**: JPQL `LOWER(:nullParam)` → PostgreSQL `lower(bytea)` error → switched to JPA Specifications
+- Push: feature/sprint-1-api-foundation → github.com/rhorba/atlas-events
+
 ## 2026-06-29 — PHASE: EXECUTE (Doc 01/10)
 **MILESTONE**: PRD drafted → docs/prd-atlas-events.md
 - Problem, goals, 13 user stories (Attendee / Organizer / Admin), in/out of scope, 13 FRs, 7 NFRs, 6 risks, timeline through Sprint 8.

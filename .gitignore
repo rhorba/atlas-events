@@ -1,0 +1,36 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot
+application-local.yml
+application-prod.yml
+
+# Environment (never commit real secrets)
+.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Docker
+.docker/
+
+# Node / Angular (added in Sprint 5)
+atlas-web/node_modules/
+atlas-web/dist/
+atlas-web/.angular/
+
+# OS
+Thumbs.db
