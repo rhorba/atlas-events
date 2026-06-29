@@ -1,0 +1,73 @@
+﻿# ACTIVITY — Atlas Events
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 01/10)
+**MILESTONE**: PRD drafted → docs/prd-atlas-events.md
+- Problem, goals, 13 user stories (Attendee / Organizer / Admin), in/out of scope, 13 FRs, 7 NFRs, 6 risks, timeline through Sprint 8.
+- Status: APPROVED by user 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 02/10)
+HANDOFF: Project Manager → System Designer
+Context: PRD approved. NFRs: p99 < 500ms, 99.5% uptime, 6hr scraper, OWASP Top 10. Comprehensive architecture.
+Need: System Design doc — NFRs, topology, data flows, SDRs.
+**MILESTONE**: System Design APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 03/10)
+HANDOFF: System Designer → Software Architect
+**MILESTONE**: Architecture drafted → docs/architecture-atlas-events.md
+- 8 ADRs (Hexagonal arch, Spring Batch, Strategy pattern, pkg-by-feature, Flyway, JWT, ical4j, Angular lazy-load)
+- Full package structure for atlas-api + atlas-scraper + Angular SPA
+- Domain model (Event, EventSubmission, ScrapeLog), API contract (14 endpoints), security + infra summary
+- Status: APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 04/10)
+HANDOFF: Software Architect → Security Engineer
+**MILESTONE**: Security Baseline drafted → docs/security-atlas-events.md
+- STRIDE (11 entries), auth (JWT HS256, 1-hr TTL, rate-limit, lockout), OWASP Top 10 controls, PII inventory (contactEmail only), HTTP security headers, 20+ dev requirements, GDPR notes.
+- Status: APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 05/10)
+HANDOFF: Security Engineer → DBA
+**MILESTONE**: Database Design drafted → docs/database-atlas-events.md
+- 3 tables (events, event_submissions, scrape_logs), full SQL DDL, 9 indexes (incl. partial + JSONB expression), 4 Flyway migrations, Spring Batch batch schema config, 9 access patterns, soft-delete pattern, PII flagging on contact_email.
+- Status: APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 06/10)
+HANDOFF: DBA → UX Designer
+**MILESTONE**: UX Foundation drafted → docs/ux-atlas-events.md
+- 3 personas (Karim/Nadia/Admin), full sitemap (8 routes), 3 core flows (browse+iCal, submit, admin moderation), 5 wireframes (list, detail, submit form, admin queue, RTL layout), screen states table, WCAG 2.1 AA notes.
+- Status: APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 07/10)
+HANDOFF: UX Designer → UI Designer
+**MILESTONE**: UI Foundation drafted → docs/ui-atlas-events.md
+- Framework: Angular Material MDC + FullCalendar + Tailwind. Brand: deep teal-navy + Moroccan amber-gold. Fonts: Plus Jakarta Sans (FR) + IBM Plex Sans Arabic (AR). Full token set (primitive→semantic), 20-component inventory, responsive grid, RTL CSS logical properties, accessibility checks.
+- Status: APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 08/10)
+HANDOFF: UI Designer → Test Architect
+**MILESTONE**: Test Strategy drafted → docs/test-strategy-atlas-events.md
+- Risk table (14 components scored), pyramid targets per module (JUnit5+Mockito+Testcontainers / Jest+Playwright), 6 ATDD feature blocks (28 scenarios), Tier 1+2 adversarial checklist (30+ items), NFR test plan (k6+axe-core), traceability matrix (13 FRs), 8-item release gate.
+- Status: APPROVED 2026-06-29.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 10/10)
+HANDOFF: DevOps/DevSecOps → Scrum Master + Test Architect
+**MILESTONE**: Epics & Stories drafted → docs/stories-atlas-events.md
+- 5 epics (API Foundation / Scraper Pipeline / Angular Frontend / Admin Dashboard / K8s+Go-Live)
+- 20 stories, each with Given/When/Then acceptance criteria referencing ATDD scenarios from test-strategy
+- Sizes (S/M/L) + sprint allocation across 8 sprints (2026-06-30 → 2026-08-31)
+- Definition of Done: coverage ≥ 80%, lint pass, no new Critical/High security findings, staging smoke-tested
+- Status: APPROVED 2026-06-29.
+- **ALL 10 FOUNDATION DOCUMENTS COMPLETE AND APPROVED.**
+
+## 2026-06-29 — PHASE: SHIP (Sprint 0 — Foundation docs push)
+All 10 docs approved. Running git init + commit + push.
+
+## 2026-06-29 — PHASE: EXECUTE (Doc 09/10)
+HANDOFF: Test Architect → DevOps/DevSecOps
+**MILESTONE**: DevOps Foundation drafted → docs/devops-atlas-events.md + .env.example
+- 3 environments (local/staging/prod), full GitHub Actions pipeline (6 stages, parallel test jobs), 3 Dockerfiles (JRE21-alpine + Nginx non-root), Docker Compose (5 services), K8s manifest outline (Kustomize overlays), K8s secrets strategy, Prometheus+Grafana monitoring (8 alerts, 3 dashboards), 5 security scanning gates.
+- .env.example written with all default values.
+- Status: Awaiting user approval before Doc 10 (Stories).
+**MILESTONE**: System Design drafted → docs/system-design-atlas-events.md
+- NFR table (11 attributes), capacity estimate (< 5 RPS peak), full ASCII topology, 4 data flows (read/iCal/write/async scrape/admin), 5 SDRs.
+- Status: Awaiting user approval before Doc 03 (Architecture).
