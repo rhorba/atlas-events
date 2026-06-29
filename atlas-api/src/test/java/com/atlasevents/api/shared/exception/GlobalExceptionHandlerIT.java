@@ -38,10 +38,11 @@ class GlobalExceptionHandlerIT {
     }
 
     @Test
-    void deniedRoute_returns403() {
+    void adminRouteWithoutToken_returns401() {
         ResponseEntity<String> response = restTemplate.getForEntity(
                 "/api/v1/admin/submissions", String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).contains("Unauthorized");
     }
 }
