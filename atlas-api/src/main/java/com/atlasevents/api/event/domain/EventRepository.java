@@ -9,4 +9,6 @@ public interface EventRepository {
     EventPage findActive(String city, String category, ZonedDateTime fromDate, ZonedDateTime toDate, int page, int size);
 
     Optional<Event> findById(UUID id);
+
+    boolean saveScrapedEvent(ScrapedEventInput input);
 }

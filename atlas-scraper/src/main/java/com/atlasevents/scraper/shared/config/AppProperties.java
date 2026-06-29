@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AppProperties(
         String tentimesUrl,
         String allConferenceAlertUrl,
+        String pcnsUrl,
         int httpTimeoutMs,
         boolean robotsCheckEnabled
 ) {}

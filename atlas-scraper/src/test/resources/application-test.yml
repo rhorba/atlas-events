@@ -2,5 +2,6 @@ atlas:
   scraper:
     tentimes-url: https://10times.com/morocco
     all-conference-alert-url: https://www.allconferencealert.com/morocco.html
+    pcns-url: https://www.pcns.ma/evenements.aspx
     http-timeout-ms: 5000
     robots-check-enabled: false

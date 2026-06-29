@@ -2,6 +2,7 @@ package com.atlasevents.scraper.batch;
 
 import com.atlasevents.scraper.scraping.domain.ScrapedEvent;
 import com.atlasevents.scraper.scraping.infrastructure.AllConferenceAlertScraper;
+import com.atlasevents.scraper.scraping.infrastructure.PcnsScraper;
 import com.atlasevents.scraper.scraping.infrastructure.TentimesScraper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ class ScraperJobIT {
     @MockBean
     private AllConferenceAlertScraper allConferenceAlertScraper;
 
+    @MockBean
+    private PcnsScraper pcnsScraper;
+
     @Autowired
     private JobLauncher jobLauncher;
 
@@ -59,6 +63,10 @@ class ScraperJobIT {
         when(allConferenceAlertScraper.getSourceName()).thenReturn("allconferencealert");
         when(allConferenceAlertScraper.getTargetUrl()).thenReturn("https://www.allconferencealert.com/morocco.html");
         when(allConferenceAlertScraper.scrape()).thenReturn(List.of(sampleEvent("rabat")));
+
+        when(pcnsScraper.getSourceName()).thenReturn("pcns");
+        when(pcnsScraper.getTargetUrl()).thenReturn("https://www.pcns.ma/evenements.aspx");
+        when(pcnsScraper.scrape()).thenReturn(List.of(sampleEvent("marrakech")));
     }
 
     @Test
@@ -70,7 +78,7 @@ class ScraperJobIT {
         JobExecution execution = jobLauncher.run(scraperJob, params);
 
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-        assertThat(execution.getStepExecutions()).hasSize(2);
+        assertThat(execution.getStepExecutions()).hasSize(3);
     }
 
     @Test
@@ -81,7 +89,7 @@ class ScraperJobIT {
 
         assertThat(execution.getStepExecutions())
                 .extracting(StepExecution::getStepName)
-                .containsExactlyInAnyOrder("tentimesStep", "allConferenceAlertStep");
+                .containsExactlyInAnyOrder("tentimesStep", "allConferenceAlertStep", "pcnsStep");
 
         assertThat(execution.getStepExecutions())
                 .allMatch(step -> step.getStatus() == BatchStatus.COMPLETED);

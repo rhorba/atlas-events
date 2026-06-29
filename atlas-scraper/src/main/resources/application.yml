@@ -40,5 +40,6 @@ atlas:
   scraper:
     tentimes-url: ${TENTIMES_URL:https://10times.com/morocco}
     all-conference-alert-url: ${ALL_CONFERENCE_ALERT_URL:https://www.allconferencealert.com/morocco.html}
+    pcns-url: ${PCNS_URL:https://www.pcns.ma/evenements.aspx}
     http-timeout-ms: ${SCRAPER_HTTP_TIMEOUT_MS:10000}
     robots-check-enabled: ${ROBOTS_CHECK_ENABLED:true}
