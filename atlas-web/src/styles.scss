@@ -1,0 +1,26 @@
+:root {
+  --color-primary: #0d6e6e;
+  --color-primary-dark: #0a5555;
+  --color-accent: #d4a017;
+  --color-bg: #f7fafc;
+  --color-bg-surface: #ffffff;
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #718096;
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+[dir="rtl"] body {
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
