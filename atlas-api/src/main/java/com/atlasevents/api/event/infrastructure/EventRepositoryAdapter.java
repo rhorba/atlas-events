@@ -1,9 +1,11 @@
 package com.atlasevents.api.event.infrastructure;
 
+import com.atlasevents.api.event.domain.AdminEventUpdateCommand;
 import com.atlasevents.api.event.domain.Event;
 import com.atlasevents.api.event.domain.EventPage;
 import com.atlasevents.api.event.domain.EventRepository;
 import com.atlasevents.api.event.domain.ScrapedEventInput;
+import com.atlasevents.api.shared.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
@@ -81,6 +83,41 @@ class EventRepositoryAdapter implements EventRepository {
                 sourceJson
         );
         return rows > 0;
+    }
+
+    @Override
+    public List<Event> findAllForAdmin() {
+        return jpaRepository.findAll(Sort.by("createdAt").descending())
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public Event adminUpdate(UUID id, AdminEventUpdateCommand cmd) {
+        EventJpaEntity entity = jpaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Event not found: " + id));
+        if (cmd.titleFr() != null) {
+            Map<String, String> title = entity.getTitle() != null
+                    ? new java.util.HashMap<>(entity.getTitle()) : new java.util.HashMap<>();
+            title.put("fr", cmd.titleFr());
+            if (cmd.titleAr() != null) title.put("ar", cmd.titleAr());
+            entity.setTitle(title);
+        }
+        if (cmd.city() != null) entity.setCity(cmd.city());
+        if (cmd.category() != null) entity.setCategory(cmd.category());
+        if (cmd.organizer() != null) entity.setOrganizer(cmd.organizer());
+        if (cmd.registrationUrl() != null) entity.setRegistrationUrl(cmd.registrationUrl());
+        if (cmd.venue() != null) entity.setVenue(cmd.venue());
+        if (cmd.isFree() != null) entity.setFree(cmd.isFree());
+        if (cmd.status() != null) entity.setStatus(cmd.status());
+        return mapper.toDomain(jpaRepository.save(entity));
+    }
+
+    @Override
+    public void softDelete(UUID id) {
+        EventJpaEntity entity = jpaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Event not found: " + id));
+        entity.setDeletedAt(ZonedDateTime.now());
+        jpaRepository.save(entity);
     }
 
     private String toJson(Object value) {

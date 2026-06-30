@@ -52,6 +52,9 @@ class SubmissionJpaEntity {
     @Column(nullable = false)
     private SubmissionStatus status;
 
+    @Column(name = "review_note")
+    private String reviewNote;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private ZonedDateTime createdAt;
 

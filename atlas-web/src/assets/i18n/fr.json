@@ -91,5 +91,52 @@
   "errors": {
     "load_failed": "Impossible de charger les événements. Veuillez réessayer.",
     "not_found": "Événement introuvable."
+  },
+  "admin": {
+    "login": {
+      "title": "Espace Admin",
+      "username": "Identifiant",
+      "password": "Mot de passe",
+      "btn": "Se connecter",
+      "error": "Identifiants invalides"
+    },
+    "nav": {
+      "submissions": "Soumissions",
+      "events": "Événements",
+      "scrape": "Scrapers",
+      "logout": "Déconnexion"
+    },
+    "submissions": {
+      "title": "Soumissions en attente",
+      "empty": "Aucune soumission en attente 🎉",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "confirm_reject": "Confirmer le rejet",
+      "note_placeholder": "Motif du rejet (optionnel)",
+      "approved": "Soumission approuvée",
+      "rejected": "Soumission rejetée",
+      "error": "Erreur lors de l'action"
+    },
+    "events": {
+      "title": "Gestion des événements",
+      "edit": "Modifier",
+      "save": "Enregistrer",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "deleted": "Événement supprimé",
+      "saved": "Événement mis à jour",
+      "error": "Erreur lors de l'opération"
+    },
+    "scrape": {
+      "title": "Santé des scrapers",
+      "trigger": "Déclencher un scraping",
+      "triggered": "Scraping déclenché",
+      "source": "Source",
+      "started_at": "Démarré le",
+      "events_found": "Trouvés",
+      "events_inserted": "Insérés",
+      "status": "Statut",
+      "error": "Erreur lors du déclenchement"
+    }
   }
 }
