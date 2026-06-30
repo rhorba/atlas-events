@@ -3,6 +3,7 @@ package com.atlasevents.scraper.batch;
 import com.atlasevents.scraper.scraping.infrastructure.AllConferenceAlertScraper;
 import com.atlasevents.scraper.scraping.infrastructure.PcnsScraper;
 import com.atlasevents.scraper.scraping.infrastructure.TentimesScraper;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -17,19 +18,22 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class ScraperJobConfig {
 
     @Bean
-    public ScrapeTasklet tentimesTasklet(TentimesScraper scraper, RabbitTemplate rabbitTemplate) {
-        return new ScrapeTasklet(scraper, rabbitTemplate);
+    public ScrapeTasklet tentimesTasklet(TentimesScraper scraper, RabbitTemplate rabbitTemplate,
+                                          MeterRegistry meterRegistry) {
+        return new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
     }
 
     @Bean
     public ScrapeTasklet allConferenceAlertTasklet(AllConferenceAlertScraper scraper,
-                                                    RabbitTemplate rabbitTemplate) {
-        return new ScrapeTasklet(scraper, rabbitTemplate);
+                                                    RabbitTemplate rabbitTemplate,
+                                                    MeterRegistry meterRegistry) {
+        return new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
     }
 
     @Bean
-    public ScrapeTasklet pcnsTasklet(PcnsScraper scraper, RabbitTemplate rabbitTemplate) {
-        return new ScrapeTasklet(scraper, rabbitTemplate);
+    public ScrapeTasklet pcnsTasklet(PcnsScraper scraper, RabbitTemplate rabbitTemplate,
+                                      MeterRegistry meterRegistry) {
+        return new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
     }
 
     @Bean

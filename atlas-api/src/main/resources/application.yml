@@ -34,10 +34,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,prometheus
+        include: health,prometheus,info
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: atlas-api
+
+info:
+  app:
+    name: Atlas Events API
+    version: 1.0.0
 
 atlas:
   admin:

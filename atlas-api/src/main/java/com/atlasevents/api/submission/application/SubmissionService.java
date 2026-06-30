@@ -3,6 +3,8 @@ package com.atlasevents.api.submission.application;
 import com.atlasevents.api.submission.domain.EventSubmission;
 import com.atlasevents.api.submission.domain.SubmissionRepository;
 import com.atlasevents.api.submission.domain.SubmissionStatus;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -12,9 +14,13 @@ import java.util.UUID;
 public class SubmissionService {
 
     private final SubmissionRepository repository;
+    private final Counter submissionsCreated;
 
-    public SubmissionService(SubmissionRepository repository) {
+    public SubmissionService(SubmissionRepository repository, MeterRegistry meterRegistry) {
         this.repository = repository;
+        this.submissionsCreated = Counter.builder("atlas.submissions.created")
+                .description("Total community event submissions received")
+                .register(meterRegistry);
     }
 
     public UUID submit(SubmissionCommand command) {
@@ -34,6 +40,8 @@ public class SubmissionService {
                 null,
                 ZonedDateTime.now()
         );
-        return repository.save(submission).id();
+        UUID id = repository.save(submission).id();
+        submissionsCreated.increment();
+        return id;
     }
 }

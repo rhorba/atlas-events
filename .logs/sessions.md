@@ -1,5 +1,19 @@
 # SESSIONS — Atlas Events
 
+## SESSION_END — 2026-06-30 (Sprint 8)
+**Completed**: Sprint 8 SHIP phase — Stories 5.1, 5.2, 5.3, 5.4, 5.5
+**Branch pushed**: feature/sprint-8 (0e30164) — new branch as requested | **CI**: awaiting GitHub Actions
+**Done this session**:
+- 3 multi-stage Dockerfiles (atlas-api, atlas-scraper, atlas-web+nginx)
+- nginx.conf: security headers + /api/ proxy + SPA routing + static caching
+- docker-compose.yml: all 5 services with healthchecks and depends_on conditions
+- k8s/base/: 11 manifest files — namespace, 3 deployments, 3 services, 3 configmaps, ingress, networkpolicy, cronjob
+- k8s/overlays/staging/ + k8s/overlays/prod/ with Kustomize patches
+- ci.yml: extended with test-e2e, build-images, deploy-staging, deploy-prod jobs
+- Playwright E2E: 5 spec files + playwright.config.ts + package.json scripts
+- DEPLOY.md: full production runbook (8 sections)
+**Next session**: Monitor CI on feature/sprint-8, merge Sprint 8 to master when GREEN, start Sprint 9 if scoped
+
 ## SESSION_END — 2026-06-30 (Sprint 7)
 **Completed**: Sprint 7 SHIP phase — Stories 4.1, 4.2, 4.3, 4.4
 **Branch pushed**: feature/sprint-5 (a6c67a8) | **CI**: GREEN ✓

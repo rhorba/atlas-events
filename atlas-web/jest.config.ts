@@ -4,6 +4,7 @@ const config: Config = {
   preset: 'jest-preset-angular',
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
   testMatch: ['**/*.spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   collectCoverageFrom: [
     'src/app/**/*.ts',
     '!src/app/**/*.spec.ts',
