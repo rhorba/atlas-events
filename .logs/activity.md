@@ -1,5 +1,33 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — FIX: scraper "403" admin dashboard + robustness + recording v1.2
+
+**Root cause of reported "403"**: not a live failure — `scrape_logs` still held rows from the
+3 retired scrapers (10times, allconferencealert, pcns) that were deleted from the codebase in
+commit a86e043. `findRecent(limit)` mixes all sources, so the admin scrape dashboard showed
+several red `403 Forbidden` rows even though the live EventbriteScraper was succeeding
+(verified via direct trigger: `success=true, events_found=19, error_message=null`).
+
+**Changes**:
+- `V007__cleanup_retired_scraper_logs.sql`: deletes stale scrape_logs rows for retired sources
+- `EventbriteScraper.java`: added 2s spacing between the 3 category-page requests — Eventbrite
+  was reproducibly returning a stripped page (no `__SERVER_DATA__`) for `/business--events/`
+  when hit <1.5s after the prior request; fixed `InterruptedException` handling on the new sleep
+- `EventbriteScraperTest.java`: new `scrape()`-level test against a local `HttpServer` covering
+  success/404/empty-data branches (scrape() itself had 0% coverage before — only parseDocument
+  was tested). Bundle LINE coverage: 78.07% → 90.91%
+- `docker-compose.yml`: fixed atlas-web healthcheck (`localhost` resolved to `::1` inside the
+  container, nginx only binds IPv4; also `grep -q atlas` was case-sensitive against `AtlasWeb`)
+
+**Verification**: rebuilt atlas-api + atlas-scraper images, restarted full stack, all 5
+containers healthy, triggered a live scrape via JWT — `eventbrite success=true, 19 events`,
+no errors. `mvn verify -P ci` green on both atlas-api and atlas-scraper (coverage ≥ 80%).
+
+**Recording**: `.recordings/v1.2-2026-06-30.webm` — `full-demo.spec.ts` re-run with
+`video: 'on'`, all 12 flows pass against the fixed stack.
+
+---
+
 ## 2026-06-30 — CI: deploy-staging and deploy-prod made functional (self-hosted runner + Docker Desktop k8s)
 
 **Changes**:

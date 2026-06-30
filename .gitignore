@@ -34,3 +34,7 @@ atlas-web/.angular/
 
 # OS
 Thumbs.db
+
+# Test artifacts / crash dumps
+atlas-web/playwright-results/
+*.stackdump

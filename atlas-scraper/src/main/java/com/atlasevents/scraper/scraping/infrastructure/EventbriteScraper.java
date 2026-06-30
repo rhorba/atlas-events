@@ -25,6 +25,7 @@ public class EventbriteScraper implements EventScraper {
     private static final String SOURCE_NAME = "eventbrite";
     private static final ZoneId MOROCCO = ZoneId.of("Africa/Casablanca");
     private static final String DATA_MARKER = "window.__SERVER_DATA__ = ";
+    private static final long REQUEST_SPACING_MS = 2000;
 
     private static final List<String> CATEGORY_PATHS = List.of(
             "/d/morocco/tech--events/",
@@ -54,9 +55,16 @@ public class EventbriteScraper implements EventScraper {
         String base = properties.eventbriteBaseUrl();
         Map<String, ScrapedEvent> seen = new LinkedHashMap<>();
 
+        boolean first = true;
         for (String path : CATEGORY_PATHS) {
             String url = base + path;
             try {
+                if (!first) {
+                    // Eventbrite returns a stripped page (no __SERVER_DATA__) when hit
+                    // again within ~1.5s of a previous request; space requests out.
+                    Thread.sleep(REQUEST_SPACING_MS);
+                }
+                first = false;
                 log.info("Scraping Eventbrite: {}", url);
                 Document doc = Jsoup.connect(url)
                         .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
@@ -67,6 +75,10 @@ public class EventbriteScraper implements EventScraper {
                 for (ScrapedEvent event : parseDocument(doc, url)) {
                     seen.putIfAbsent(event.sourceUrl(), event);
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Eventbrite scrape interrupted before {}", url);
+                break;
             } catch (Exception e) {
                 log.warn("Failed to scrape Eventbrite {}: {}", url, e.getMessage());
             }

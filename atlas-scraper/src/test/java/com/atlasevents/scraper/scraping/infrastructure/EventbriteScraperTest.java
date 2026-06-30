@@ -2,12 +2,15 @@ package com.atlasevents.scraper.scraping.infrastructure;
 
 import com.atlasevents.scraper.scraping.domain.ScrapedEvent;
 import com.atlasevents.scraper.shared.config.AppProperties;
+import com.sun.net.httpserver.HttpServer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -19,6 +22,7 @@ class EventbriteScraperTest {
 
     private EventbriteScraper scraper;
     private AppProperties props;
+    private HttpServer server;
 
     @BeforeEach
     void setUp() {
@@ -27,6 +31,38 @@ class EventbriteScraperTest {
         when(props.httpTimeoutMs()).thenReturn(5000);
         when(props.robotsCheckEnabled()).thenReturn(false);
         scraper = new EventbriteScraper(props);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (server != null) server.stop(0);
+    }
+
+    @Test
+    void scrape_acrossCategoryPages_dedupesAndSkipsBadPages() throws Exception {
+        server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/d/morocco/tech--events/", exchange -> respond(exchange, 200,
+                buildRawHtml("Atlas Tech Summit", "2026-10-10", "Science & Tech", "Casablanca", "casablanca")));
+        server.createContext("/d/morocco/business--events/", exchange -> respond(exchange, 404, "not found"));
+        server.createContext("/d/morocco/all-events/", exchange -> respond(exchange, 200,
+                "<html><head></head><body><script>var x = 1;</script></body></html>"));
+        server.start();
+
+        when(props.eventbriteBaseUrl()).thenReturn("http://localhost:" + server.getAddress().getPort());
+
+        List<ScrapedEvent> events = scraper.scrape();
+
+        assertThat(events).hasSize(1);
+        assertThat(events.get(0).title().get("fr")).isEqualTo("Atlas Tech Summit");
+    }
+
+    private void respond(com.sun.net.httpserver.HttpExchange exchange, int status, String body) throws java.io.IOException {
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+        exchange.sendResponseHeaders(status, bytes.length);
+        try (var os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
     }
 
     @Test
