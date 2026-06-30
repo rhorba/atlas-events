@@ -1,5 +1,22 @@
 # SESSIONS — Atlas Events
 
+## SESSION_END — 2026-06-30 (Sprint 6)
+**Completed**: Sprint 6 SHIP phase — Stories 3.3, 3.4, 3.5
+**Branch pushed**: feature/sprint-5 (6624bad)
+**CI**: GREEN ✓
+**Done this session**:
+- EventDetailComponent (/events/:id): loading/404 states, iCal download, RouterLink navigation
+- CalendarComponent (/calendar): FullCalendar v6 (dayGrid + list), category filter, lang$ reactive locale, resize listener
+- SubmitFormComponent (/submit): ReactiveFormsModule, URL/email validators, 429 rate-limit error, reset flow
+- SubmissionService: POST /api/v1/submissions
+- Routes: lazy-loaded /events/:id, /calendar, /submit
+- AppComponent nav bar with routerLinkActive
+- EventCardComponent: title → RouterLink to detail page
+- i18n: events.detail.*, calendar.*, submit.fields.* in fr.json + ar.json
+- Jest mock infra: moduleNameMapper @fullcalendar/* → fullcalendar-mock.ts; TestBed.overrideComponent for CalendarComponent
+- 71/71 tests pass; coverage 92.47% stmts / 80.59% branches ≥ 80% gate
+**Next session**: Sprint 7 — check backlog for remaining stories (likely Search/Filtering polish, admin flows, or API integration hardening)
+
 ## SESSION_END — 2026-06-30
 **Completed**: Sprint 5 SHIP phase
 **Branch pushed**: feature/sprint-5
