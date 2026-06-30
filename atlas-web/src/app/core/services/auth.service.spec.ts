@@ -26,7 +26,7 @@ describe('AuthService', () => {
     const req = http.expectOne(`${environment.apiUrl}/api/v1/auth/login`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ username: 'admin', password: 'secret' });
-    req.flush({ token: 'jwt-abc' });
+    req.flush({ data: { token: 'jwt-abc' } });
     expect(sessionStorage.getItem(TOKEN_KEY)).toBe('jwt-abc');
   });
 

@@ -28,11 +28,20 @@ describe('SubmissionService', () => {
 
   afterEach(() => http.verify());
 
-  it('POSTs to /api/v1/submissions with the request body', () => {
+  it('POSTs to /api/v1/submissions with the transformed API body', () => {
     service.submit(mockReq).subscribe();
     const req = http.expectOne(`${environment.apiUrl}/api/v1/submissions`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(mockReq);
+    expect(req.request.body).toEqual({
+      title: 'Atlas DevConf 2026',
+      startDate: '2026-09-01T00:00:00+01:00',
+      city: 'casablanca',
+      organizerName: 'AtlasTech',
+      eventUrl: 'https://atlastech.ma/devconf',
+      contactEmail: null,
+      description: null,
+      isFree: false,
+    });
     req.flush(null, { status: 201, statusText: 'Created' });
   });
 
