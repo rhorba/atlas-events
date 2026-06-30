@@ -26,6 +26,8 @@ no errors. `mvn verify -P ci` green on both atlas-api and atlas-scraper (coverag
 **Recording**: `.recordings/v1.2-2026-06-30.webm` — `full-demo.spec.ts` re-run with
 `video: 'on'`, all 12 flows pass against the fixed stack.
 
+**Push**: commit 1fd8636 — `git push origin master` ✓ (2741bf0..1fd8636)
+
 ---
 
 ## 2026-06-30 — CI: deploy-staging and deploy-prod made functional (self-hosted runner + Docker Desktop k8s)
