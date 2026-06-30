@@ -232,7 +232,7 @@ jobs:
             --from-literal=DATABASE_PASSWORD="placeholder" \
             --from-literal=RABBITMQ_USERNAME="placeholder" \
             --from-literal=RABBITMQ_PASSWORD="placeholder" \
-            --from-literal=JWT_SECRET="placeholder-jwt-secret-min-32-chars-ok" \
+            --from-literal=JWT_SECRET="${{ vars.CI_JWT_PLACEHOLDER }}" \
             --from-literal=ADMIN_USERNAME="admin" \
             --from-literal=ADMIN_PASSWORD="placeholder"
       - name: Set image tags to SHA
@@ -299,7 +299,7 @@ jobs:
             --from-literal=DATABASE_PASSWORD="placeholder" \
             --from-literal=RABBITMQ_USERNAME="placeholder" \
             --from-literal=RABBITMQ_PASSWORD="placeholder" \
-            --from-literal=JWT_SECRET="placeholder-jwt-secret-min-32-chars-ok" \
+            --from-literal=JWT_SECRET="${{ vars.CI_JWT_PLACEHOLDER }}" \
             --from-literal=ADMIN_USERNAME="admin" \
             --from-literal=ADMIN_PASSWORD="placeholder"
       - name: Set image tags to SHA
