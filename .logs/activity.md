@@ -1,5 +1,17 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PHASE: SHIP (Sprint 5)
+**Branch**: feature/sprint-5
+**Stories**: 3.1 (Angular scaffold), 3.2 (Event list page), 3.6 (FR/AR toggle), 1.7 (Login rate limiting)
+**Pushed**: git push origin feature/sprint-5 ✓
+- atlas-web: Angular 17 standalone scaffold with Jest 29 + jest-preset-angular@14
+- EventListComponent: URL-synced city/category/range filters, skeleton cards, error/empty states
+- LanguageService + LanguageToggleComponent: FR/AR toggle via ngx-translate v18 standalone API
+- LoginRateLimiter (Bucket4j 7.6): 10 failed attempts → 429 for 15 min, keyed by IP
+- AuthController updated to inject LoginRateLimiter + HttpServletRequest
+- CI: test-web job added (Node 20, npm ci, jest --coverage --ci)
+- Coverage: atlas-web 86% statements / 86% branches (40 tests); atlas-api gate met (30 unit + ITs)
+
 ## 2026-06-29 — PHASE: EXECUTE → SHIP (Sprint 1)
 **Stories**: 1.1 (Maven scaffold), 1.2 (Flyway migrations), 1.3 (Event list API)
 **Milestone**: Sprint 1 code complete — atlas-api foundation + event list endpoint
