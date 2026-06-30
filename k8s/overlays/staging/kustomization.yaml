@@ -6,8 +6,6 @@ resources:
 
 patches:
   - path: replica-patch.yaml
-    target:
-      kind: Deployment
   - path: ingress-patch.yaml
     target:
       kind: Ingress
