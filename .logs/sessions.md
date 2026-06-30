@@ -1,5 +1,21 @@
 # SESSIONS — Atlas Events
 
+## SESSION_END — 2026-06-30 (Sprint 7)
+**Completed**: Sprint 7 SHIP phase — Stories 4.1, 4.2, 4.3, 4.4
+**Branch pushed**: feature/sprint-5 (a6c67a8) | **CI**: GREEN ✓
+**Done this session**:
+- V006 migration: review_note column on event_submissions
+- AdminSubmissionController: list PENDING, approve, reject with note
+- AdminEventController: list all (incl. soft-deleted), partial update, soft-delete
+- EventRepository + adapter extended with admin methods
+- SubmissionRepository extended with findByStatus/findById/updateStatus
+- AuthService, AdminService, authInterceptor, adminGuard
+- 4 admin Angular components: AdminLoginComponent, AdminSubmissionsComponent, AdminEventsComponent, AdminScrapeComponent
+- Admin routes lazy-loaded + guarded in app.routes.ts
+- i18n keys: admin.login.*, admin.nav.*, admin.submissions.*, admin.events.*, admin.scrape.*
+- 124/124 tests, 18 suites, 94.94% stmts / 84.26% branches (all ≥ 80%)
+**Next session**: Sprint 8 — Docker Compose local validation, K8s manifests, full CI/CD, Playwright E2E, production go-live
+
 ## SESSION_END — 2026-06-30 (Sprint 6)
 **Completed**: Sprint 6 SHIP phase — Stories 3.3, 3.4, 3.5
 **Branch pushed**: feature/sprint-5 (6624bad)
