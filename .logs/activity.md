@@ -1,5 +1,17 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PHASE: SHIP (Sprint 9)
+**Branch**: feature/sprint-9 (new)
+**Stories**: 6.1 (Actuator + Micrometer), 6.2 (Prometheus k8s), 6.3 (Grafana + dashboards), 6.4 (Grafana ingress), 6.5 (DEPLOY.md)
+**Pushed**: git push origin feature/sprint-9 ✓ | **CI**: GREEN ✓ (run 28438719310, 2 commits needed)
+- Story 6.1: micrometer-registry-prometheus added to atlas-scraper pom; /actuator/prometheus + probes enabled both services; 4 custom counters (atlas.submissions.created, atlas.scraper.events.found/runs.total/runs.failed tagged by source); ScraperJobConfig updated to inject MeterRegistry; SubmissionServiceTest + ScrapeTaskletTest updated with SimpleMeterRegistry + counter assertions
+- Bug fix: ScrapeTasklet constructor null-safe tag init (Objects.requireNonNullElse) — Micrometer rejects null tag when @MockBean returns null before @BeforeEach stubs
+- Story 6.2: k8s/base/monitoring/prometheus/ — RBAC (SA+ClusterRole+CRB), prometheus.yml ConfigMap scraping api:8080+scraper:8081, 5 alert rules ConfigMap (ApiErrorRateHigh/ApiLatencyHigh/ApiPodNotReady/ScraperJobsFailing/ScraperNoEventsFound), Deployment (UID 65534, 15d retention, probes), Service, 5Gi PVC
+- Story 6.3: k8s/base/monitoring/grafana/ — Deployment (UID 472, creds from Secret), Service, 2Gi PVC; provisioned datasource ConfigMap; 3 dashboard ConfigMaps (JVM: heap/GC/threads/CPU, API: RPS/5xx/latency/submissions, Scraper: found/failed/success rate)
+- Story 6.4: monitoring-ingress (nginx+TLS+basic-auth); staging patch (grafana.staging.atlas-events.ma); prod patch (grafana.atlas-events.ma); ingress patches in both overlays scoped by name
+- Misc: atlas-scraper/service.yaml added to base (needed for Prometheus scrape); kustomization.yaml updated to include monitoring + scraper service
+- Story 6.5: DEPLOY.md monitoring section (first-time secrets, dashboard table, alert rules table, port-forward fallback, prometheus target verification)
+
 ## 2026-06-30 — PHASE: SHIP (Sprint 8)
 **Branch**: feature/sprint-8 (new branch — user requested separate from feature/sprint-5)
 **Stories**: 5.1 (Dockerfiles), 5.2 (k8s Kustomize), 5.3 (CI/CD pipeline), 5.4 (Playwright E2E), 5.5 (DEPLOY.md)

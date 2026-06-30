@@ -1,5 +1,19 @@
 # SESSIONS — Atlas Events
 
+## SESSION_END — 2026-06-30 (Sprint 9)
+**Completed**: Sprint 9 SHIP phase — Stories 6.1, 6.2, 6.3, 6.4, 6.5
+**Branch pushed**: feature/sprint-9 (44a0d54) — new branch | **CI**: GREEN ✓
+**Done this session**:
+- Micrometer counters in atlas-api (SubmissionService) and atlas-scraper (ScrapeTasklet)
+- micrometer-registry-prometheus + /actuator/prometheus added to atlas-scraper
+- k8s/base/monitoring/: Prometheus (RBAC, scrape config, 5 alert rules, Deployment, Service, 5Gi PVC)
+- k8s/base/monitoring/: Grafana (Deployment, Service, 2Gi PVC, provisioned datasource + 3 dashboards)
+- Grafana ingress with HTTP basic-auth and per-overlay subdomain patches
+- Ingress patches in overlays now name-scoped to prevent cross-patching
+- DEPLOY.md monitoring section with full first-time setup runbook
+- Bug fix: null-safe MeterRegistry tag in ScrapeTasklet constructor (@MockBean returns null before @BeforeEach)
+**Next session**: Sprint 10 — user to define scope (candidates: full-text search, PWA, email notifications, SEO/SSR)
+
 ## SESSION_END — 2026-06-30 (Sprint 8)
 **Completed**: Sprint 8 SHIP phase — Stories 5.1, 5.2, 5.3, 5.4, 5.5
 **Branch pushed**: feature/sprint-8 (0e30164) — new branch as requested | **CI**: awaiting GitHub Actions

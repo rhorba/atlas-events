@@ -1,5 +1,19 @@
 ﻿# METRICS — Atlas Events
 
+## Sprint 9 — 2026-06-30
+| Metric | Value | Gate | Status |
+|---|---|---|---|
+| Custom Micrometer counters | 4 (submissions.created, scraper.events.found, runs.total, runs.failed) | Story 6.1 | ✓ |
+| Prometheus scrape targets | 2 (atlas-api :8080, atlas-scraper :8081) | Story 6.2 | ✓ |
+| Alert rules | 5 (ApiErrorRateHigh, ApiLatencyHigh, ApiPodNotReady, ScraperJobsFailing, ScraperNoEventsFound) | Story 6.2 | ✓ |
+| Grafana dashboards | 3 pre-provisioned (JVM, API, Scraper) | Story 6.3 | ✓ |
+| k8s monitoring manifests | 16 files (namespace, RBAC, 5× prometheus, 7× grafana, ingress, kustomization) | Stories 6.2–6.4 | ✓ |
+| atlas-scraper unit tests | 53 (7 in ScrapeTaskletTest incl. 3 counter assertions) | ≥80% cov | ✓ |
+| atlas-api unit tests | 32 (2 new in SubmissionServiceTest) | ≥80% cov | ✓ |
+| CI run | GREEN (run 28438719310) | — | ✓ |
+| CI fixes needed | 2 (package-lock sync, MockBean null tag) | — | resolved |
+| Stories complete | 6.1 + 6.2 + 6.3 + 6.4 + 6.5 | Sprint 9 | ✓ |
+
 ## Sprint 8 — 2026-06-30
 | Metric | Value | Gate | Status |
 |---|---|---|---|
