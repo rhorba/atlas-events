@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlas-scraper
+  namespace: atlas-events
+  labels:
+    app: atlas-scraper
+    app.kubernetes.io/part-of: atlas-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atlas-scraper
+  template:
+    metadata:
+      labels:
+        app: atlas-scraper
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: atlas-scraper
+          image: ghcr.io/atlas-events/atlas-scraper:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: atlas-scraper-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: atlas-secrets
+                  key: DATABASE_URL
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: atlas-secrets
+                  key: DATABASE_USERNAME
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: atlas-secrets
+                  key: DATABASE_PASSWORD
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: atlas-secrets
+                  key: RABBITMQ_USERNAME
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: atlas-secrets
+                  key: RABBITMQ_PASSWORD
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+      restartPolicy: Always

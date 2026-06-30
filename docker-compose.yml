@@ -1,0 +1,113 @@
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: atlasevents
+      POSTGRES_USER: ${DATABASE_USERNAME:-atlas}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-atlas_local_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-atlas} -d atlasevents"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-atlas}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-atlas_local_rabbit}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Application services ────────────────────────────────────────────────────
+
+  atlas-api:
+    build:
+      context: .
+      dockerfile: atlas-api/Dockerfile
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/atlasevents
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-atlas}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-atlas_local_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-atlas}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-atlas_local_rabbit}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin_local_password}
+      JWT_SECRET: ${JWT_SECRET:-local_dev_jwt_secret_change_in_production_32chars_minimum}
+      CORS_ALLOWED_ORIGINS: http://localhost:4200,http://atlas-web:80
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    restart: unless-stopped
+
+  atlas-scraper:
+    build:
+      context: .
+      dockerfile: atlas-scraper/Dockerfile
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/atlasevents
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-atlas}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-atlas_local_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-atlas}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-atlas_local_rabbit}
+      ROBOTS_CHECK_ENABLED: ${ROBOTS_CHECK_ENABLED:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health | grep -q UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  atlas-web:
+    build:
+      context: atlas-web
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      atlas-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ | grep -q atlas"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,142 @@
+{
+  "nav": {
+    "events": "Événements",
+    "calendar": "Calendrier",
+    "submit": "Soumettre",
+    "language": "Langue"
+  },
+  "events": {
+    "title": "Événements au Maroc",
+    "filters": {
+      "city": "Ville",
+      "category": "Catégorie",
+      "range": "Période",
+      "all_cities": "Toutes les villes",
+      "all_categories": "Toutes les catégories",
+      "range_week": "Cette semaine",
+      "range_month": "Ce mois",
+      "range_all": "Toutes les dates",
+      "reset": "Réinitialiser les filtres"
+    },
+    "card": {
+      "free": "Gratuit",
+      "register": "S'inscrire",
+      "add_calendar": "Ajouter au calendrier"
+    },
+    "detail": {
+      "back": "Retour aux événements",
+      "register": "S'inscrire",
+      "add_calendar": "Ajouter au calendrier",
+      "free": "Gratuit",
+      "venue": "Lieu",
+      "organizer": "Organisateur",
+      "tags": "Tags",
+      "not_found_back": "Retour aux événements"
+    },
+    "empty": {
+      "title": "Aucun événement trouvé",
+      "message": "Aucun événement ne correspond à vos filtres.",
+      "reset": "Réinitialiser les filtres"
+    },
+    "loading": "Chargement des événements..."
+  },
+  "calendar": {
+    "title": "Calendrier des événements",
+    "filter_all": "Toutes les catégories",
+    "loading": "Chargement du calendrier...",
+    "error": "Impossible de charger les événements."
+  },
+  "categories": {
+    "technology": "Technologie",
+    "science": "Science",
+    "business": "Business",
+    "startup": "Startup",
+    "arts": "Arts & Culture",
+    "policy": "Politique",
+    "health": "Santé",
+    "education": "Éducation",
+    "other": "Autre"
+  },
+  "cities": {
+    "casablanca": "Casablanca",
+    "rabat": "Rabat",
+    "marrakech": "Marrakech",
+    "fes": "Fès",
+    "tanger": "Tanger",
+    "agadir": "Agadir",
+    "meknes": "Meknès",
+    "oujda": "Oujda"
+  },
+  "submit": {
+    "title": "Soumettre votre événement",
+    "fields": {
+      "titleFr": "Titre (en français)",
+      "startDate": "Date de début",
+      "city": "Ville",
+      "category": "Catégorie",
+      "organizer": "Organisateur",
+      "registrationUrl": "Lien d'inscription",
+      "contactEmail": "Email de contact (optionnel)",
+      "description": "Description (optionnel)"
+    },
+    "required": "Ce champ est requis",
+    "url_invalid": "URL invalide (doit commencer par https://)",
+    "email_invalid": "Email invalide",
+    "btn_submit": "Soumettre l'événement",
+    "submitting": "Envoi en cours...",
+    "success": "Votre événement a été soumis. Il sera examiné dans les 24 heures.",
+    "submit_another": "Soumettre un autre événement",
+    "rate_limit": "Trop de soumissions — réessayez dans une heure"
+  },
+  "errors": {
+    "load_failed": "Impossible de charger les événements. Veuillez réessayer.",
+    "not_found": "Événement introuvable."
+  },
+  "admin": {
+    "login": {
+      "title": "Espace Admin",
+      "username": "Identifiant",
+      "password": "Mot de passe",
+      "btn": "Se connecter",
+      "error": "Identifiants invalides"
+    },
+    "nav": {
+      "submissions": "Soumissions",
+      "events": "Événements",
+      "scrape": "Scrapers",
+      "logout": "Déconnexion"
+    },
+    "submissions": {
+      "title": "Soumissions en attente",
+      "empty": "Aucune soumission en attente 🎉",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "confirm_reject": "Confirmer le rejet",
+      "note_placeholder": "Motif du rejet (optionnel)",
+      "approved": "Soumission approuvée",
+      "rejected": "Soumission rejetée",
+      "error": "Erreur lors de l'action"
+    },
+    "events": {
+      "title": "Gestion des événements",
+      "edit": "Modifier",
+      "save": "Enregistrer",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "deleted": "Événement supprimé",
+      "saved": "Événement mis à jour",
+      "error": "Erreur lors de l'opération"
+    },
+    "scrape": {
+      "title": "Santé des scrapers",
+      "trigger": "Déclencher un scraping",
+      "triggered": "Scraping déclenché",
+      "source": "Source",
+      "started_at": "Démarré le",
+      "events_found": "Trouvés",
+      "events_inserted": "Insérés",
+      "status": "Statut",
+      "error": "Erreur lors du déclenchement"
+    }
+  }
+}

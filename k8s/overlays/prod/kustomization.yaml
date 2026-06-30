@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - path: replica-patch.yaml
+    target:
+      kind: Deployment
+  - path: resources-patch.yaml
+    target:
+      kind: Deployment
+  - path: ingress-patch.yaml
+    target:
+      kind: Ingress
+      name: atlas-ingress
+  - path: monitoring-ingress-patch.yaml
+    target:
+      kind: Ingress
+      name: monitoring-ingress
+
+images:
+  - name: ghcr.io/atlas-events/atlas-api
+    newTag: "prod"
+  - name: ghcr.io/atlas-events/atlas-scraper
+    newTag: "prod"
+  - name: ghcr.io/atlas-events/atlas-web
+    newTag: "prod"

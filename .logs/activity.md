@@ -1,5 +1,97 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PHASE: SHIP (Sprint 9)
+**Branch**: feature/sprint-9 (new)
+**Stories**: 6.1 (Actuator + Micrometer), 6.2 (Prometheus k8s), 6.3 (Grafana + dashboards), 6.4 (Grafana ingress), 6.5 (DEPLOY.md)
+**Pushed**: git push origin feature/sprint-9 ✓ | **CI**: GREEN ✓ (run 28438719310, 2 commits needed)
+- Story 6.1: micrometer-registry-prometheus added to atlas-scraper pom; /actuator/prometheus + probes enabled both services; 4 custom counters (atlas.submissions.created, atlas.scraper.events.found/runs.total/runs.failed tagged by source); ScraperJobConfig updated to inject MeterRegistry; SubmissionServiceTest + ScrapeTaskletTest updated with SimpleMeterRegistry + counter assertions
+- Bug fix: ScrapeTasklet constructor null-safe tag init (Objects.requireNonNullElse) — Micrometer rejects null tag when @MockBean returns null before @BeforeEach stubs
+- Story 6.2: k8s/base/monitoring/prometheus/ — RBAC (SA+ClusterRole+CRB), prometheus.yml ConfigMap scraping api:8080+scraper:8081, 5 alert rules ConfigMap (ApiErrorRateHigh/ApiLatencyHigh/ApiPodNotReady/ScraperJobsFailing/ScraperNoEventsFound), Deployment (UID 65534, 15d retention, probes), Service, 5Gi PVC
+- Story 6.3: k8s/base/monitoring/grafana/ — Deployment (UID 472, creds from Secret), Service, 2Gi PVC; provisioned datasource ConfigMap; 3 dashboard ConfigMaps (JVM: heap/GC/threads/CPU, API: RPS/5xx/latency/submissions, Scraper: found/failed/success rate)
+- Story 6.4: monitoring-ingress (nginx+TLS+basic-auth); staging patch (grafana.staging.atlas-events.ma); prod patch (grafana.atlas-events.ma); ingress patches in both overlays scoped by name
+- Misc: atlas-scraper/service.yaml added to base (needed for Prometheus scrape); kustomization.yaml updated to include monitoring + scraper service
+- Story 6.5: DEPLOY.md monitoring section (first-time secrets, dashboard table, alert rules table, port-forward fallback, prometheus target verification)
+
+## 2026-06-30 — PHASE: SHIP (Sprint 8)
+**Branch**: feature/sprint-8 (new branch — user requested separate from feature/sprint-5)
+**Stories**: 5.1 (Dockerfiles), 5.2 (k8s Kustomize), 5.3 (CI/CD pipeline), 5.4 (Playwright E2E), 5.5 (DEPLOY.md)
+**Pushed**: git push origin feature/sprint-8 ✓ (new branch, first push)
+- atlas-api/Dockerfile: multi-stage Maven 3.9/Eclipse Temurin 21 → JRE 21 alpine, non-root user atlas (UID 1000)
+- atlas-scraper/Dockerfile: same pattern, EXPOSE 8081
+- atlas-web/Dockerfile: Node 20 alpine build (npm ci --legacy-peer-deps, ng build production) → nginx:1.27-alpine, non-root user atlas
+- atlas-web/nginx.conf: security headers (X-Frame-Options, CSP, nosniff, Referrer-Policy), /api/ proxy to atlas-api:8080, SPA fallback, static asset cache headers
+- docker-compose.yml: all 5 services (postgres, rabbitmq, atlas-api, atlas-scraper, atlas-web) with healthchecks + depends_on conditions
+- k8s/base/: namespace, atlas-api (deployment/service/configmap), atlas-scraper (deployment/configmap), atlas-web (deployment/service), ingress, networkpolicy, cronjob
+- k8s/overlays/staging/: replica-patch (1/1/1) + ingress-patch (staging.atlas-events.ma)
+- k8s/overlays/prod/: replica-patch (3/1/2) + resources-patch (higher limits) + ingress-patch (atlas-events.ma)
+- ci.yml: build-images job (docker buildx matrix → GHCR, SHA + latest tags), deploy-staging (auto), deploy-prod (manual Environment approval), test-e2e job (Playwright, continue-on-error)
+- Playwright E2E: event-list.spec.ts, event-detail.spec.ts, submit.spec.ts, admin-login.spec.ts, accessibility.spec.ts (axe-core WCAG 2.0 A/AA scan)
+- playwright.config.ts, package.json scripts: e2e + e2e:ci
+- DEPLOY.md: full production runbook (prerequisites, first-time setup, CI/CD pipeline, manual deploy, smoke tests, rollback A/B, secret rotation, manual scrape trigger)
+
+## 2026-06-30 — PHASE: SHIP (Sprint 7)
+**Branch**: feature/sprint-5
+**Stories**: 4.1 (Admin login), 4.2 (Submission moderation), 4.3 (Event management), 4.4 (Scraper health dashboard)
+**Pushed**: git push origin feature/sprint-5 ✓ | **CI**: GREEN ✓
+- V006 migration: `review_note TEXT` column on event_submissions
+- AdminSubmissionController: GET /api/v1/admin/submissions?status=PENDING, PATCH approve/reject
+- AdminEventController: GET/PUT/DELETE /api/v1/admin/events/{id} with soft-delete
+- AdminEventUpdateCommand domain record; EventRepository + EventRepositoryAdapter extended
+- SubmissionRepository extended: findByStatus, findById, updateStatus
+- Angular AuthService (sessionStorage JWT), AdminService (full API client)
+- authInterceptor (functional): Bearer token on /admin/* requests
+- adminGuard (functional CanActivateFn)
+- AdminLoginComponent, AdminSubmissionsComponent, AdminEventsComponent, AdminScrapeComponent
+- Admin routes lazy-loaded + guarded in app.routes.ts
+- i18n: admin.* keys in fr.json + ar.json
+- Coverage: 94.94% stmts / 84.26% branches / 95.23% funcs — all gates met
+- Tests: 124/124 (18 suites)
+
+## 2026-06-30 — PHASE: SHIP (Sprint 6)
+**Branch**: feature/sprint-5
+**Stories**: 3.3 (Event detail page), 3.4 (Calendar view), 3.5 (Submit event form)
+**Pushed**: git push origin feature/sprint-5 ✓
+- EventDetailComponent: `/events/:id` with loading/404 states, iCal download (Blob + URL.createObjectURL), RTL-safe CSS logical properties
+- CalendarComponent: `/calendar` using @fullcalendar/angular v6 (dayGrid + list plugins), category filter, lang$ subscription, resize listener
+- SubmitFormComponent: `/submit` ReactiveFormsModule, URL + email validators, rate_limit 429 / generic error states, reset flow
+- SubmissionService: POST `/api/v1/submissions` via HttpClient
+- Routes updated: lazy-loaded /events/:id, /calendar, /submit
+- AppComponent nav bar: RouterLink + routerLinkActive for 3 routes
+- EventCardComponent: title wrapped in [routerLink] to /events/:id
+- i18n: events.detail.*, calendar.*, submit.fields.* keys added to fr.json + ar.json
+- Jest: moduleNameMapper for @fullcalendar/* → fullcalendar-mock.ts; overrideComponent pattern for CalendarComponent tests
+- Coverage: 92.47% stmts / 80.59% branches / 94.73% funcs / 93.54% lines — all gates met
+- Tests: 71 passed / 71 total (10 suites)
+
+## 2026-06-30 — PHASE: SHIP (Sprint 5)
+**Branch**: feature/sprint-5
+**Stories**: 3.1 (Angular scaffold), 3.2 (Event list page), 3.6 (FR/AR toggle), 1.7 (Login rate limiting)
+**Pushed**: git push origin feature/sprint-5 ✓
+- atlas-web: Angular 17 standalone scaffold with Jest 29 + jest-preset-angular@14
+- EventListComponent: URL-synced city/category/range filters, skeleton cards, error/empty states
+- LanguageService + LanguageToggleComponent: FR/AR toggle via ngx-translate v18 standalone API
+- LoginRateLimiter (Bucket4j 7.6): 10 failed attempts → 429 for 15 min, keyed by IP
+- AuthController updated to inject LoginRateLimiter + HttpServletRequest
+- CI: test-web job added (Node 20, npm ci, jest --coverage --ci)
+- Coverage: atlas-web 86% statements / 86% branches (40 tests); atlas-api gate met (30 unit + ITs)
+
+## 2026-06-29 — PHASE: EXECUTE → SHIP (Sprint 1)
+**Stories**: 1.1 (Maven scaffold), 1.2 (Flyway migrations), 1.3 (Event list API)
+**Milestone**: Sprint 1 code complete — atlas-api foundation + event list endpoint
+- Root pom.xml (parent, Java 21, Spring Boot 3.4.1, Testcontainers BOM)
+- atlas-api: Web, JPA, Security, Validation, Flyway, Actuator, Prometheus
+- atlas-scraper: minimal scaffold (Web + Actuator), Spring Batch added Sprint 3
+- Flyway migrations V001–V004: events, event_submissions, scrape_logs, batch schema
+- Hexagonal architecture: Event domain record + EventRepository port + EventService + EventRepositoryAdapter + JPA Specifications (avoids PostgreSQL null-type-inference bug)
+- GET /api/v1/events (city, category, range, page, size filters) + GET /api/v1/events/{id}
+- SecurityConfig: public routes permit, admin routes deny (JWT auth wired Sprint 2)
+- docker-compose.yml: postgres:16-alpine + rabbitmq:3-management-alpine
+- Maven Wrapper (mvnw) added for reproducible builds
+- **Tests**: 15 total (7 unit EventServiceTest + 8 integration EventControllerIT + GlobalExceptionHandlerIT via Testcontainers PostgreSQL)
+- **Coverage**: 89% instruction (gate: 80%) — CI profile verified ✓
+- **Bug fixed**: JPQL `LOWER(:nullParam)` → PostgreSQL `lower(bytea)` error → switched to JPA Specifications
+- Push: feature/sprint-1-api-foundation → github.com/rhorba/atlas-events
+
 ## 2026-06-29 — PHASE: EXECUTE (Doc 01/10)
 **MILESTONE**: PRD drafted → docs/prd-atlas-events.md
 - Problem, goals, 13 user stories (Attendee / Organizer / Admin), in/out of scope, 13 FRs, 7 NFRs, 6 risks, timeline through Sprint 8.
@@ -62,6 +154,22 @@ HANDOFF: DevOps/DevSecOps → Scrum Master + Test Architect
 ## 2026-06-29 — PHASE: SHIP (Sprint 0 — Foundation docs push)
 All 10 docs approved. git init → commit 99df1fe → pushed to https://github.com/rhorba/atlas-events (branch: master).
 21 files committed: 10 docs + .env.example + 8 log files + CLAUDE.md + README.md. CI: not yet configured (Sprint 8).
+
+## 2026-06-29 — PHASE: SHIP (Sprint 4 — Scraper expansion + admin endpoints)
+**Branch**: feature/sprint-4
+**Stories**: 2.4 (PcnsScraper), 2.5 (dedup RabbitMQ consumer), 2.6 (scrape log + admin trigger)
+- `PcnsScraper`: Jsoup `article.pcns-event` selectors, `dd/MM/yyyy` French locale, strategy normalizeCategory
+- `ScraperJobConfig`: 3-step Spring Batch job (tentimesStep → allConferenceAlertStep → pcnsStep)
+- `ScrapedEventConsumer`: validates title/startDate/city, calls `saveScrapedEvent` with `ON CONFLICT DO NOTHING`, logs insert vs duplicate
+- `RabbitMQConfig`: retry interceptor (3 attempts, 2× backoff, DLQ); `rabbitListenerContainerFactory` guarded with `@ConditionalOnBean(ConnectionFactory.class)` so test profile works
+- `ScrapeResultConsumer`: receives `ScrapeResultMessage` from scraper, persists `ScrapeLog` via JPA adapter
+- `AdminScrapeController`: `POST /api/v1/admin/scrape/trigger` (202) + `GET /api/v1/admin/scrape/logs?source=&limit=` (JWT-protected)
+- `TestMessagingConfig`: test-profile `@Configuration` providing mock `RabbitTemplate` for all ITs without RabbitMQ Testcontainers
+- **Tests**: atlas-scraper 52 unit+IT all pass; atlas-api 29 unit+IT all pass
+- **Coverage**: both modules ≥ 80% — `All coverage checks have been met` ✓
+- **Push**: `git push origin feature/sprint-4` ✓ — branch visible at github.com/rhorba/atlas-events
+- **.env.example**: added TENTIMES_URL, ALL_CONFERENCE_ALERT_URL, PCNS_URL, HTTP_TIMEOUT_MS, ROBOTS_CHECK_ENABLED
+- **Gaps noted for upcoming sprints**: login rate limiting (Story 1.7 AC: 10 failed → 429); GET /api/v1/admin/submissions endpoint (Story 1.7 + 4.2)
 
 ## 2026-06-29 — PHASE: EXECUTE (Doc 09/10)
 HANDOFF: Test Architect → DevOps/DevSecOps

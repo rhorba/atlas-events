@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: atlas-scraper
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/atlasevents}
+    username: ${DATABASE_USERNAME:atlas}
+    password: ${DATABASE_PASSWORD:atlas_local_password}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      schema-locations:
+        - classpath:batch-schema.sql
+        - classpath:batch-tables.sql
+      mode: always
+  batch:
+    jdbc:
+      initialize-schema: never
+      table-prefix: batch.BATCH_
+    job:
+      enabled: false
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+server:
+  port: ${APP_PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: atlas-scraper
+
+atlas:
+  scraper:
+    tentimes-url: ${TENTIMES_URL:https://10times.com/morocco}
+    all-conference-alert-url: ${ALL_CONFERENCE_ALERT_URL:https://www.allconferencealert.com/morocco.html}
+    pcns-url: ${PCNS_URL:https://www.pcns.ma/evenements.aspx}
+    http-timeout-ms: ${SCRAPER_HTTP_TIMEOUT_MS:10000}
+    robots-check-enabled: ${ROBOTS_CHECK_ENABLED:true}

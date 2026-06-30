@@ -1,0 +1,287 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, "feature/**", "fix/**"]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+
+  # ── Stage 0: Secrets scan ────────────────────────────────────────────────────
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Stage 1: Test Java modules (parallel) ───────────────────────────────────
+  test-api:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Run tests + coverage gate (atlas-api)
+        run: ./mvnw -pl atlas-api verify -P ci
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: atlas-api/target/site/jacoco/
+          retention-days: 14
+
+  test-scraper:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Run tests + coverage gate (atlas-scraper)
+        run: ./mvnw -pl atlas-scraper verify -P ci
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-coverage
+          path: atlas-scraper/target/site/jacoco/
+          retention-days: 14
+
+  # ── Stage 1b: Test Angular (atlas-web) ─────────────────────────────────────
+  test-web:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: atlas-web/package-lock.json
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: atlas-web
+      - name: Run tests + coverage gate (atlas-web)
+        run: npm run test:ci
+        working-directory: atlas-web
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage
+          path: atlas-web/coverage/
+          retention-days: 14
+
+  # ── Stage 1c: Playwright E2E ────────────────────────────────────────────────
+  test-e2e:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: atlas-web/package-lock.json
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: atlas-web
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: atlas-web
+      - name: Run E2E tests
+        run: npm run e2e:ci
+        working-directory: atlas-web
+        env:
+          E2E_BASE_URL: http://localhost:4200
+          CI: true
+        continue-on-error: true
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: atlas-web/playwright-report/
+          retention-days: 30
+
+  # ── Stage 2: Security scan ──────────────────────────────────────────────────
+  security-scan:
+    needs: [test-api, test-scraper, test-web, test-e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Pre-populate Maven local cache for Trivy
+        run: ./mvnw dependency:resolve dependency:resolve-plugins --no-transfer-progress -q
+      - name: Trivy SCA — atlas-api
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: atlas-api
+          severity: CRITICAL,HIGH
+          exit-code: 0
+          format: table
+      - name: Trivy SCA — atlas-scraper
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: atlas-scraper
+          severity: CRITICAL,HIGH
+          exit-code: 0
+          format: table
+
+  # ── Stage 3: Build & push Docker images (main/master only) ─────────────────
+  build-images:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    strategy:
+      matrix:
+        include:
+          - service: atlas-api
+            context: .
+            dockerfile: atlas-api/Dockerfile
+          - service: atlas-scraper
+            context: .
+            dockerfile: atlas-scraper/Dockerfile
+          - service: atlas-web
+            context: atlas-web
+            dockerfile: atlas-web/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
+          tags: |
+            type=sha,prefix=,suffix=,format=short
+            type=raw,value=latest
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Stage 4: Deploy to staging ──────────────────────────────────────────────
+  deploy-staging:
+    needs: build-images
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure kubeconfig (staging)
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+      - name: Set image tags to SHA
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          cd k8s/overlays/staging
+          kustomize edit set image \
+            ghcr.io/atlas-events/atlas-api=ghcr.io/${{ github.repository_owner }}/atlas-api:${SHORT_SHA} \
+            ghcr.io/atlas-events/atlas-scraper=ghcr.io/${{ github.repository_owner }}/atlas-scraper:${SHORT_SHA} \
+            ghcr.io/atlas-events/atlas-web=ghcr.io/${{ github.repository_owner }}/atlas-web:${SHORT_SHA}
+      - name: Apply Kustomize (staging)
+        run: kubectl apply -k k8s/overlays/staging
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/atlas-api -n atlas-events --timeout=120s
+          kubectl rollout status deployment/atlas-web -n atlas-events --timeout=120s
+      - name: Smoke test (staging)
+        run: |
+          STAGING_URL="https://staging.atlas-events.ma"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" ${STAGING_URL}/api/v1/events || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Smoke test passed (HTTP 200)"
+              exit 0
+            fi
+            echo "Attempt $i: got HTTP ${STATUS}, retrying in 10s..."
+            sleep 10
+          done
+          echo "Smoke test failed after 5 attempts"
+          exit 1
+
+  # ── Stage 5: Deploy to production (manual approval) ────────────────────────
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure kubeconfig (prod)
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+      - name: Set image tags to SHA
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          cd k8s/overlays/prod
+          kustomize edit set image \
+            ghcr.io/atlas-events/atlas-api=ghcr.io/${{ github.repository_owner }}/atlas-api:${SHORT_SHA} \
+            ghcr.io/atlas-events/atlas-scraper=ghcr.io/${{ github.repository_owner }}/atlas-scraper:${SHORT_SHA} \
+            ghcr.io/atlas-events/atlas-web=ghcr.io/${{ github.repository_owner }}/atlas-web:${SHORT_SHA}
+      - name: Apply Kustomize (prod)
+        run: kubectl apply -k k8s/overlays/prod
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/atlas-api -n atlas-events --timeout=300s
+          kubectl rollout status deployment/atlas-web -n atlas-events --timeout=300s
+      - name: Smoke test (prod)
+        run: |
+          PROD_URL="https://atlas-events.ma"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" ${PROD_URL}/api/v1/events || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Smoke test passed (HTTP 200)"
+              exit 0
+            fi
+            echo "Attempt $i: got HTTP ${STATUS}, retrying in 15s..."
+            sleep 15
+          done
+          echo "Smoke test failed after 5 attempts"
+          exit 1
