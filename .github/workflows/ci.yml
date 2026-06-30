@@ -202,6 +202,7 @@ jobs:
   deploy-staging:
     needs: build-images
     runs-on: ubuntu-latest
+    continue-on-error: true
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: staging
     steps:
