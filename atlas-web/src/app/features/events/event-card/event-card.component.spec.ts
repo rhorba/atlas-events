@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
+import { RouterTestingModule } from '@angular/router/testing';
 import { EventCardComponent } from './event-card.component';
 import { Event } from '../../../core/models/event.model';
 
@@ -20,7 +21,7 @@ describe('EventCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EventCardComponent],
+      imports: [EventCardComponent, RouterTestingModule],
       providers: [provideTranslateService({ lang: 'fr' })],
     }).compileComponents();
     fixture = TestBed.createComponent(EventCardComponent);

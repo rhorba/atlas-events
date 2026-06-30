@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 import { EventListComponent } from './event-list.component';
@@ -24,29 +25,28 @@ describe('EventListComponent', () => {
   let fixture: ComponentFixture<EventListComponent>;
   let component: EventListComponent;
   let eventService: jest.Mocked<EventService>;
-  let router: jest.Mocked<Router>;
+  let router: Router;
 
   beforeEach(async () => {
     const eventServiceMock = {
       getEvents: jest.fn().mockReturnValue(of({ data: [mockEvent], total: 1, page: 0, size: 20 })),
       getEvent: jest.fn(),
     };
-    const routerMock = { navigate: jest.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [EventListComponent],
+      imports: [EventListComponent, RouterTestingModule.withRoutes([])],
       providers: [
         provideTranslateService({ lang: 'fr' }),
         { provide: EventService, useValue: eventServiceMock },
         { provide: ActivatedRoute, useValue: makeRoute() },
-        { provide: Router, useValue: routerMock },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EventListComponent);
     component = fixture.componentInstance;
     eventService = TestBed.inject(EventService) as jest.Mocked<EventService>;
-    router = TestBed.inject(Router) as jest.Mocked<Router>;
+    router = TestBed.inject(Router);
+    jest.spyOn(router, 'navigate').mockImplementation(async () => true);
     fixture.detectChanges();
   });
 
@@ -100,14 +100,15 @@ describe('EventListComponent', () => {
       getEvents: jest.fn().mockReturnValue(of({ data: [], total: 0, page: 0, size: 20 })),
     };
     await TestBed.configureTestingModule({
-      imports: [EventListComponent],
+      imports: [EventListComponent, RouterTestingModule.withRoutes([])],
       providers: [
         provideTranslateService({ lang: 'fr' }),
         { provide: EventService, useValue: eventServiceMock2 },
         { provide: ActivatedRoute, useValue: makeRoute({ city: 'fes' }) },
-        { provide: Router, useValue: { navigate: jest.fn() } },
       ],
     }).compileComponents();
+    const r = TestBed.inject(Router);
+    jest.spyOn(r, 'navigate').mockImplementation(async () => true);
     const fix = TestBed.createComponent(EventListComponent);
     fix.detectChanges();
     await fix.whenStable();
