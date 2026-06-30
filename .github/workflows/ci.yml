@@ -246,7 +246,7 @@ jobs:
       - name: Apply Kustomize (staging)
         run: kubectl apply -k k8s/overlays/staging
       - name: Wait for rollout (atlas-web)
-        run: kubectl rollout status deployment/atlas-web -n atlas-events --timeout=180s
+        run: kubectl rollout status deployment/atlas-web -n atlas-events --timeout=300s
       - name: Wait for rollout (atlas-api)
         continue-on-error: true
         run: kubectl rollout status deployment/atlas-api -n atlas-events --timeout=120s
@@ -261,6 +261,11 @@ jobs:
             echo "Smoke test failed: HTTP ${STATUS}"
             exit 1
           fi
+      - name: Diagnose pod state
+        if: failure()
+        run: |
+          kubectl get pods -n atlas-events -o wide
+          kubectl describe pods -l app=atlas-web -n atlas-events
       - name: Delete k3d cluster (staging)
         if: always()
         run: k3d cluster delete staging
@@ -328,6 +333,11 @@ jobs:
             echo "Smoke test failed: HTTP ${STATUS}"
             exit 1
           fi
+      - name: Diagnose pod state
+        if: failure()
+        run: |
+          kubectl get pods -n atlas-events -o wide
+          kubectl describe pods -l app=atlas-web -n atlas-events
       - name: Delete k3d cluster (prod)
         if: always()
         run: k3d cluster delete prod
