@@ -1,5 +1,21 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PHASE: SHIP (Sprint 6)
+**Branch**: feature/sprint-5
+**Stories**: 3.3 (Event detail page), 3.4 (Calendar view), 3.5 (Submit event form)
+**Pushed**: git push origin feature/sprint-5 ✓
+- EventDetailComponent: `/events/:id` with loading/404 states, iCal download (Blob + URL.createObjectURL), RTL-safe CSS logical properties
+- CalendarComponent: `/calendar` using @fullcalendar/angular v6 (dayGrid + list plugins), category filter, lang$ subscription, resize listener
+- SubmitFormComponent: `/submit` ReactiveFormsModule, URL + email validators, rate_limit 429 / generic error states, reset flow
+- SubmissionService: POST `/api/v1/submissions` via HttpClient
+- Routes updated: lazy-loaded /events/:id, /calendar, /submit
+- AppComponent nav bar: RouterLink + routerLinkActive for 3 routes
+- EventCardComponent: title wrapped in [routerLink] to /events/:id
+- i18n: events.detail.*, calendar.*, submit.fields.* keys added to fr.json + ar.json
+- Jest: moduleNameMapper for @fullcalendar/* → fullcalendar-mock.ts; overrideComponent pattern for CalendarComponent tests
+- Coverage: 92.47% stmts / 80.59% branches / 94.73% funcs / 93.54% lines — all gates met
+- Tests: 71 passed / 71 total (10 suites)
+
 ## 2026-06-30 — PHASE: SHIP (Sprint 5)
 **Branch**: feature/sprint-5
 **Stories**: 3.1 (Angular scaffold), 3.2 (Event list page), 3.6 (FR/AR toggle), 1.7 (Login rate limiting)

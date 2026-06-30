@@ -1,18 +1,21 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Event } from '../../../core/models/event.model';
 
 @Component({
   selector: 'app-event-card',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     <article class="event-card">
       <span class="category-badge" [attr.data-category]="event.category">
         {{ 'categories.' + event.category | translate }}
       </span>
-      <h2 class="event-title">{{ event.title.fr }}</h2>
+      <h2 class="event-title">
+        <a class="title-link" [routerLink]="['/events', event.id]">{{ event.title.fr }}</a>
+      </h2>
       <p class="event-meta">
         <span class="event-date">{{ event.startDate | date:'dd MMM yyyy' }}</span>
         <span class="separator">·</span>
@@ -65,7 +68,16 @@ import { Event } from '../../../core/models/event.model';
       font-size: 16px;
       font-weight: 700;
       margin: 0;
+    }
+    .title-link {
       color: var(--color-text-primary, #1a202c);
+      text-decoration: none;
+    }
+    .title-link:hover { color: var(--color-primary, #0d6e6e); text-decoration: underline; }
+    .title-link:focus-visible {
+      outline: 2px solid var(--color-primary, #0d6e6e);
+      outline-offset: 2px;
+      border-radius: 2px;
     }
     .event-meta {
       font-size: 13px;

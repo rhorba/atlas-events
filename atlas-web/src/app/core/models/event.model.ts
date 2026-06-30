@@ -33,3 +33,14 @@ export interface EventFilters {
   page?: number;
   size?: number;
 }
+
+export interface SubmissionRequest {
+  titleFr: string;
+  startDate: string;
+  city: string;
+  category: string;
+  organizer: string;
+  registrationUrl: string;
+  contactEmail?: string;
+  description?: string;
+}

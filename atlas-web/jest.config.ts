@@ -18,6 +18,7 @@ const config: Config = {
     },
   },
   moduleNameMapper: {
+    '^@fullcalendar/(.*)$': '<rootDir>/src/__mocks__/fullcalendar-mock.ts',
     '^src/(.*)$': '<rootDir>/src/$1',
   },
 };

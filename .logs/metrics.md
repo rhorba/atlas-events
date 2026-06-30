@@ -1,5 +1,21 @@
 ﻿# METRICS — Atlas Events
 
+## Sprint 6 — 2026-06-30
+| Metric | Value | Gate | Status |
+|---|---|---|---|
+| atlas-web Jest tests | 71 (10 suites) | ≥ 80% cov | ✓ |
+| atlas-web statement coverage | 92.47% | ≥ 80% | ✓ |
+| atlas-web branch coverage | 80.59% | ≥ 80% | ✓ |
+| atlas-web function coverage | 94.73% | ≥ 80% | ✓ |
+| atlas-web line coverage | 93.54% | ≥ 80% | ✓ |
+| New components | EventDetailComponent, CalendarComponent, SubmitFormComponent | Stories 3.3–3.5 | ✓ |
+| New service | SubmissionService | Story 3.5 | ✓ |
+| FullCalendar integration | @fullcalendar/angular@6 + daygrid + list | Story 3.4 | ✓ |
+| iCal download | Client-side Blob + URL.createObjectURL | Story 3.3 | ✓ |
+| i18n keys added | events.detail.*, calendar.*, submit.fields.* | Stories 3.3–3.5 | ✓ |
+| Compile errors | 0 | 0 | ✓ |
+| Stories complete | 3.3 + 3.4 + 3.5 | Sprint 6 | ✓ |
+
 ## Sprint 5 — 2026-06-30
 | Metric | Value | Gate | Status |
 |---|---|---|---|
