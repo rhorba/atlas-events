@@ -32,6 +32,12 @@ assertion, `onScrapeResult_setsRunIdFromMessage`; updated all `ScrapedEventMessa
 /`ScrapeResultMessage`/`ScrapeLog` constructor call sites for the new field.
 Both modules: `mvn verify -P ci` green, coverage ≥ 80%.
 
+**Push**: commit 63b5d08 — `git push origin master` ✓ (e0e27a7..63b5d08)
+
+**Recording**: `.recordings/v1.3-2026-06-30.webm` — re-ran `full-demo.spec.ts`
+against the cleaned-up stack (no seeded events, accurate eventsInserted), all
+12 flows pass.
+
 ---
 
 ## 2026-06-30 — FIX: scraper "403" admin dashboard + robustness + recording v1.2
