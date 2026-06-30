@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alert-rules
+  namespace: monitoring
+data:
+  atlas-alerts.yml: |
+    groups:
+      - name: atlas-api
+        rules:
+          - alert: ApiErrorRateHigh
+            expr: |
+              sum(rate(http_server_requests_seconds_count{application="atlas-api",status=~"5.."}[5m]))
+              /
+              sum(rate(http_server_requests_seconds_count{application="atlas-api"}[5m])) > 0.01
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Atlas API error rate > 1%"
+              description: "HTTP 5xx error rate is {{ $value | humanizePercentage }} over the last 5m."
+
+          - alert: ApiLatencyHigh
+            expr: |
+              histogram_quantile(0.99,
+                sum(rate(http_server_requests_seconds_bucket{application="atlas-api"}[5m])) by (le)
+              ) > 2
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Atlas API p99 latency > 2s"
+              description: "p99 response time is {{ $value }}s over the last 5m."
+
+          - alert: ApiPodNotReady
+            expr: |
+              kube_deployment_status_replicas_available{deployment="atlas-api",namespace="atlas-events"} < 1
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Atlas API has no ready pods"
+              description: "atlas-api deployment has 0 available replicas for 2+ minutes."
+
+      - name: atlas-scraper
+        rules:
+          - alert: ScraperJobsFailing
+            expr: |
+              sum(increase(atlas_scraper_runs_failed_total[1h])) by (source) > 3
+            for: 0m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Scraper source {{ $labels.source }} failing repeatedly"
+              description: "{{ $labels.source }} has failed {{ $value }} times in the last hour."
+
+          - alert: ScraperNoEventsFound
+            expr: |
+              sum(increase(atlas_scraper_events_found_total[24h])) by (source) == 0
+            for: 0m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Scraper source {{ $labels.source }} found 0 events in 24h"
+              description: "No events scraped from {{ $labels.source }} in the last 24 hours — site may have changed layout."

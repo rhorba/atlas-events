@@ -223,6 +223,85 @@ kubectl logs -n atlas-events job/manual-scrape-... --follow
 
 ---
 
+## Monitoring (Prometheus + Grafana)
+
+### Deploy monitoring stack
+
+The monitoring stack lives in `k8s/base/monitoring/` and is applied automatically via the overlays:
+
+```bash
+# Staging
+kubectl apply -k k8s/overlays/staging
+
+# Production
+kubectl apply -k k8s/overlays/prod
+```
+
+### First-time monitoring secrets
+
+```bash
+# Grafana admin credentials
+kubectl create secret generic grafana-secrets \
+  --namespace monitoring \
+  --from-literal=admin-user=admin \
+  --from-literal=admin-password='<STRONG_GRAFANA_PASSWORD>'
+
+# Basic-auth for Grafana ingress (htpasswd format)
+htpasswd -c /tmp/auth admin
+kubectl create secret generic monitoring-basic-auth \
+  --namespace monitoring \
+  --from-file=auth=/tmp/auth
+
+# TLS for grafana subdomain (if not using cert-manager auto-issue)
+kubectl create secret tls grafana-prod-tls \
+  --namespace monitoring \
+  --cert=path/to/grafana.crt \
+  --key=path/to/grafana.key
+```
+
+### Access Grafana
+
+**Production**: `https://grafana.atlas-events.ma` (HTTP basic-auth prompt, then Grafana login)
+
+**Port-forward fallback** (no ingress required):
+```bash
+kubectl port-forward -n monitoring svc/grafana-service 3000:3000
+# Open: http://localhost:3000
+# Login: admin / <GRAFANA_PASSWORD>
+```
+
+### Pre-provisioned dashboards
+
+All three dashboards load automatically from ConfigMaps — no manual import needed:
+
+| Dashboard | UID | Contents |
+|---|---|---|
+| Atlas Events — JVM | `atlas-jvm` | Heap, GC pause, threads, CPU |
+| Atlas Events — API | `atlas-api` | RPS, 5xx rate, p99/p95/p50 latency, total submissions |
+| Atlas Events — Scraper | `atlas-scraper` | Events found/run, runs total vs failed, success rate |
+
+### Alert rules
+
+Prometheus evaluates these rules every 15s:
+
+| Alert | Condition | Severity |
+|---|---|---|
+| `ApiErrorRateHigh` | 5xx rate > 1% for 5m | critical |
+| `ApiLatencyHigh` | p99 > 2s for 5m | warning |
+| `ApiPodNotReady` | 0 ready replicas for 2m | critical |
+| `ScraperJobsFailing` | > 3 failures/hour per source | warning |
+| `ScraperNoEventsFound` | 0 events found in 24h | warning |
+
+### Verify Prometheus is scraping
+
+```bash
+kubectl port-forward -n monitoring svc/prometheus-service 9090:9090
+# Open: http://localhost:9090/targets
+# Both atlas-api and atlas-scraper should show State: UP
+```
+
+---
+
 ## Local Docker Compose (development)
 
 ```bash

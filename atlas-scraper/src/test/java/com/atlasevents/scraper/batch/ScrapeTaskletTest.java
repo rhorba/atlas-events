@@ -5,6 +5,8 @@ import com.atlasevents.scraper.messaging.ScrapeResultMessage;
 import com.atlasevents.scraper.messaging.config.RabbitMQConfig;
 import com.atlasevents.scraper.scraping.domain.EventScraper;
 import com.atlasevents.scraper.scraping.domain.ScrapedEvent;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,13 +38,15 @@ class ScrapeTaskletTest {
     @Mock private ChunkContext chunkContext;
     @Mock private StepExecution stepExecution;
 
+    private SimpleMeterRegistry meterRegistry;
     private ScrapeTasklet tasklet;
 
     @BeforeEach
     void setUp() {
-        tasklet = new ScrapeTasklet(scraper, rabbitTemplate);
+        meterRegistry = new SimpleMeterRegistry();
         when(scraper.getSourceName()).thenReturn("test-source");
         when(scraper.getTargetUrl()).thenReturn("https://example.com");
+        tasklet = new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
     }
 
     @Test
@@ -88,6 +92,43 @@ class ScrapeTaskletTest {
         verify(rabbitTemplate).convertAndSend(
                 eq(RabbitMQConfig.EXCHANGE), eq(RabbitMQConfig.QUEUE_RESULTS),
                 any(ScrapeResultMessage.class));
+    }
+
+    @Test
+    void execute_withEvents_incrementsEventsFoundCounter() throws Exception {
+        when(scraper.scrape()).thenReturn(List.of(sampleEvent(), sampleEvent()));
+
+        tasklet.execute(contribution, chunkContext);
+
+        Counter counter = meterRegistry.find("atlas.scraper.events.found")
+                .tag("source", "test-source").counter();
+        assertThat(counter).isNotNull();
+        assertThat(counter.count()).isEqualTo(2.0);
+    }
+
+    @Test
+    void execute_always_incrementsRunsTotalCounter() throws Exception {
+        when(scraper.scrape()).thenReturn(List.of());
+
+        tasklet.execute(contribution, chunkContext);
+
+        Counter counter = meterRegistry.find("atlas.scraper.runs.total")
+                .tag("source", "test-source").counter();
+        assertThat(counter).isNotNull();
+        assertThat(counter.count()).isEqualTo(1.0);
+    }
+
+    @Test
+    void execute_scraperFails_incrementsRunsFailedCounter() throws Exception {
+        when(scraper.scrape()).thenThrow(new IOException("timeout"));
+        when(contribution.getStepExecution()).thenReturn(stepExecution);
+
+        tasklet.execute(contribution, chunkContext);
+
+        Counter failed = meterRegistry.find("atlas.scraper.runs.failed")
+                .tag("source", "test-source").counter();
+        assertThat(failed).isNotNull();
+        assertThat(failed.count()).isEqualTo(1.0);
     }
 
     private static ScrapedEvent sampleEvent() {

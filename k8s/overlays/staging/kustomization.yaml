@@ -11,6 +11,11 @@ patches:
   - path: ingress-patch.yaml
     target:
       kind: Ingress
+      name: atlas-ingress
+  - path: monitoring-ingress-patch.yaml
+    target:
+      kind: Ingress
+      name: monitoring-ingress
 
 images:
   - name: ghcr.io/atlas-events/atlas-api

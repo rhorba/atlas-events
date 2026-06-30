@@ -7,9 +7,11 @@ resources:
   - atlas-api/service.yaml
   - atlas-api/configmap.yaml
   - atlas-scraper/deployment.yaml
+  - atlas-scraper/service.yaml
   - atlas-scraper/configmap.yaml
   - atlas-web/deployment.yaml
   - atlas-web/service.yaml
   - ingress.yaml
   - networkpolicy.yaml
   - cronjob.yaml
+  - monitoring/kustomization.yaml

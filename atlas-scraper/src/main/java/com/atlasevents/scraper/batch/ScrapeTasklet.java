@@ -5,6 +5,8 @@ import com.atlasevents.scraper.messaging.ScrapeResultMessage;
 import com.atlasevents.scraper.messaging.config.RabbitMQConfig;
 import com.atlasevents.scraper.scraping.domain.EventScraper;
 import com.atlasevents.scraper.scraping.domain.ScrapedEvent;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,39 +24,58 @@ public class ScrapeTasklet implements Tasklet {
 
     private final EventScraper scraper;
     private final RabbitTemplate rabbitTemplate;
+    private final Counter eventsFound;
+    private final Counter runsTotal;
+    private final Counter runsFailed;
 
-    public ScrapeTasklet(EventScraper scraper, RabbitTemplate rabbitTemplate) {
+    public ScrapeTasklet(EventScraper scraper, RabbitTemplate rabbitTemplate, MeterRegistry meterRegistry) {
         this.scraper = scraper;
         this.rabbitTemplate = rabbitTemplate;
+        String source = scraper.getSourceName();
+        this.eventsFound = Counter.builder("atlas.scraper.events.found")
+                .description("Total events found by scraper")
+                .tag("source", source)
+                .register(meterRegistry);
+        this.runsTotal = Counter.builder("atlas.scraper.runs.total")
+                .description("Total scraper job executions")
+                .tag("source", source)
+                .register(meterRegistry);
+        this.runsFailed = Counter.builder("atlas.scraper.runs.failed")
+                .description("Failed scraper job executions")
+                .tag("source", source)
+                .register(meterRegistry);
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         String sourceName = scraper.getSourceName();
         String url = scraper.getTargetUrl();
-        int eventsFound = 0;
+        int found = 0;
         boolean success = true;
         String errorMessage = null;
 
+        runsTotal.increment();
         try {
             List<ScrapedEvent> events = scraper.scrape();
-            eventsFound = events.size();
+            found = events.size();
+            eventsFound.increment(found);
 
             for (ScrapedEvent event : events) {
                 ScrapedEventMessage message = toMessage(event);
                 rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.QUEUE_SCRAPED, message);
             }
 
-            log.info("Scrape complete: source={} url={} events={}", sourceName, url, eventsFound);
+            log.info("Scrape complete: source={} url={} events={}", sourceName, url, found);
         } catch (Exception e) {
             success = false;
             errorMessage = e.getMessage();
+            runsFailed.increment();
             log.error("Scrape failed: source={} url={} error={}", sourceName, url, errorMessage);
             contribution.getStepExecution().addFailureException(e);
         }
 
         ScrapeResultMessage result = new ScrapeResultMessage(
-                sourceName, url, eventsFound, success, errorMessage, ZonedDateTime.now());
+                sourceName, url, found, success, errorMessage, ZonedDateTime.now());
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.QUEUE_RESULTS, result);
 
         return RepeatStatus.FINISHED;
