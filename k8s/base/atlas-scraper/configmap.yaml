@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlas-scraper-config
+  namespace: atlas-events
+data:
+  SCRAPER_PROFILES_ACTIVE: "k8s"
+  SCRAPER_PORT: "8081"
+  RABBITMQ_HOST: "rabbitmq-service"
+  RABBITMQ_PORT: "5672"
+  HTTP_TIMEOUT_MS: "10000"
+  ROBOTS_CHECK_ENABLED: "true"

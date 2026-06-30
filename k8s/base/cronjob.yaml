@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: atlas-scraper-cron
+  namespace: atlas-events
+  labels:
+    app: atlas-scraper
+    app.kubernetes.io/part-of: atlas-events
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: atlas-scraper
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          containers:
+            - name: atlas-scraper
+              image: ghcr.io/atlas-events/atlas-scraper:latest
+              imagePullPolicy: Always
+              args: ["--spring.profiles.active=k8s,scrape-once"]
+              envFrom:
+                - configMapRef:
+                    name: atlas-scraper-config
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: atlas-secrets
+                      key: DATABASE_URL
+                - name: DATABASE_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: atlas-secrets
+                      key: DATABASE_USERNAME
+                - name: DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: atlas-secrets
+                      key: DATABASE_PASSWORD
+                - name: RABBITMQ_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: atlas-secrets
+                      key: RABBITMQ_USERNAME
+                - name: RABBITMQ_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: atlas-secrets
+                      key: RABBITMQ_PASSWORD
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities:
+                  drop:
+                    - ALL
