@@ -36,7 +36,8 @@ public class ScrapedEventConsumer {
                 message.registrationUrl(),
                 message.isFree(),
                 message.sourceUrl(),
-                message.sourceName()
+                message.sourceName(),
+                message.runId()
         );
 
         boolean inserted = eventRepository.saveScrapedEvent(input);

@@ -1,5 +1,39 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — FIX: events_inserted always 0 + 15 statically-seeded events in DB
+
+**Root cause #1 ("19 found, 0 inserted")**: `ScrapeResultConsumer` hardcoded
+`eventsInserted = 0` when building each `ScrapeLog` — never wired up. Structurally
+the scraper (atlas-scraper) and the per-event inserter (`ScrapedEventConsumer`,
+atlas-api) are decoupled across two independent RabbitMQ queues with no ordering
+guarantee between them, so a write-time counter would race.
+
+**Fix**: thread a `runId` (UUID, generated once per `ScrapeTasklet.execute()`)
+through `ScrapedEventMessage` and `ScrapeResultMessage` into the `events.run_id`
+and `scrape_logs.run_id` columns (`V009__add_run_id_for_insert_tracking.sql`).
+`ScrapeLogRepositoryAdapter` now computes `eventsInserted` at READ time via
+`SELECT count(*) FROM events WHERE run_id = ?` instead of trusting a stored
+counter — correct regardless of message arrival order, since by the time anyone
+loads the admin dashboard all async processing has settled. Verified live: wiped
+the events table, re-triggered, `eventsFound=19, eventsInserted=19` (was always 0
+before).
+
+**Root cause #2 ("events shown in cards should be scraped, not seeded")**: 15 of
+34 events in the DB (source `10times`/`allconferencealert`) shared one identical
+microsecond `created_at` timestamp with no matching `scrape_logs` row and no
+matching scraper code anywhere in the repo — a one-off manual `INSERT`, not a
+real scrape. `V008__remove_static_seeded_events.sql` deletes them. Confirmed
+frontend (`event.service.ts`, `event-list.component.ts`) was never hardcoding
+data itself — it always called the real `GET /api/v1/events` API; the seeded
+rows were purely server-side DB pollution.
+
+**Tests**: added `onScrapedEvent_validMessage_mapsFieldsCorrectly` runId
+assertion, `onScrapeResult_setsRunIdFromMessage`; updated all `ScrapedEventMessage`
+/`ScrapeResultMessage`/`ScrapeLog` constructor call sites for the new field.
+Both modules: `mvn verify -P ci` green, coverage ≥ 80%.
+
+---
+
 ## 2026-06-30 — FIX: scraper "403" admin dashboard + robustness + recording v1.2
 
 **Root cause of reported "403"**: not a live failure — `scrape_logs` still held rows from the

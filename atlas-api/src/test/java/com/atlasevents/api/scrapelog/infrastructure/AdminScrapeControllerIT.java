@@ -152,7 +152,7 @@ class AdminScrapeControllerIT {
         ZonedDateTime now = ZonedDateTime.now();
         scrapeLogRepository.save(new ScrapeLog(
                 UUID.randomUUID(), source, "https://example.com/" + source,
-                now.minusMinutes(5), now, 3, 2, success, null));
+                now.minusMinutes(5), now, 3, 2, success, null, UUID.randomUUID()));
     }
 
     private String obtainToken() {

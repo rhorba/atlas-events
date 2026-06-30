@@ -42,6 +42,9 @@ class ScrapeLogJpaEntity {
     @Column(name = "error_message")
     private String errorMessage;
 
+    @Column(name = "run_id")
+    private UUID runId;
+
     @PrePersist
     void prePersist() {
         if (startedAt == null) startedAt = ZonedDateTime.now();

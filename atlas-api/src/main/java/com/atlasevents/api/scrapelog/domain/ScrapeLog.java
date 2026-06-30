@@ -12,5 +12,6 @@ public record ScrapeLog(
         int eventsFound,
         int eventsInserted,
         boolean success,
-        String errorMessage
+        String errorMessage,
+        UUID runId
 ) {}

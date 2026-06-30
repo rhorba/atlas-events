@@ -1,6 +1,7 @@
 package com.atlasevents.api.messaging;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 public record ScrapeResultMessage(
         String sourceName,
@@ -8,5 +9,6 @@ public record ScrapeResultMessage(
         int eventsFound,
         boolean success,
         String errorMessage,
-        ZonedDateTime finishedAt
+        ZonedDateTime finishedAt,
+        UUID runId
 ) {}

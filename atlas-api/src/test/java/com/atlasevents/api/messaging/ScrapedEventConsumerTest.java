@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -53,6 +54,7 @@ class ScrapedEventConsumerTest {
         assertThat(input.city()).isEqualTo("casablanca");
         assertThat(input.category()).isEqualTo("technology");
         assertThat(input.sourceName()).isEqualTo("10times");
+        assertThat(input.runId()).isEqualTo(message.runId());
     }
 
     @Test
@@ -69,7 +71,7 @@ class ScrapedEventConsumerTest {
         ScrapedEventMessage message = new ScrapedEventMessage(
                 null, ZonedDateTime.now().plusDays(7), null,
                 "casablanca", null, "technology",
-                "https://10times.com/event", "10times", null, null, false);
+                "https://10times.com/event", "10times", null, null, false, UUID.randomUUID());
 
         assertThatThrownBy(() -> consumer.onScrapedEvent(message))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -81,7 +83,7 @@ class ScrapedEventConsumerTest {
         ScrapedEventMessage message = new ScrapedEventMessage(
                 Map.of("fr", "Test"), null, null,
                 "casablanca", null, "technology",
-                "https://10times.com/event", "10times", null, null, false);
+                "https://10times.com/event", "10times", null, null, false, UUID.randomUUID());
 
         assertThatThrownBy(() -> consumer.onScrapedEvent(message))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -92,7 +94,7 @@ class ScrapedEventConsumerTest {
         ScrapedEventMessage message = new ScrapedEventMessage(
                 Map.of("fr", "Test"), ZonedDateTime.now().plusDays(7), null,
                 null, null, "technology",
-                "https://10times.com/event", "10times", null, null, false);
+                "https://10times.com/event", "10times", null, null, false, UUID.randomUUID());
 
         assertThatThrownBy(() -> consumer.onScrapedEvent(message))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -110,6 +112,7 @@ class ScrapedEventConsumerTest {
                 "10times",
                 null,
                 "https://10times.com/tech-summit/register",
-                false);
+                false,
+                UUID.randomUUID());
     }
 }

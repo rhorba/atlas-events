@@ -19,6 +19,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public class ScrapeTasklet implements Tasklet {
 
@@ -52,6 +53,7 @@ public class ScrapeTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         String sourceName = scraper.getSourceName();
         String url = scraper.getTargetUrl();
+        UUID runId = UUID.randomUUID();
         int found = 0;
         boolean success = true;
         String errorMessage = null;
@@ -63,7 +65,7 @@ public class ScrapeTasklet implements Tasklet {
             eventsFound.increment(found);
 
             for (ScrapedEvent event : events) {
-                ScrapedEventMessage message = toMessage(event);
+                ScrapedEventMessage message = toMessage(event, runId);
                 rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.QUEUE_SCRAPED, message);
             }
 
@@ -77,17 +79,17 @@ public class ScrapeTasklet implements Tasklet {
         }
 
         ScrapeResultMessage result = new ScrapeResultMessage(
-                sourceName, url, found, success, errorMessage, ZonedDateTime.now());
+                sourceName, url, found, success, errorMessage, ZonedDateTime.now(), runId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.QUEUE_RESULTS, result);
 
         return RepeatStatus.FINISHED;
     }
 
-    private ScrapedEventMessage toMessage(ScrapedEvent e) {
+    private ScrapedEventMessage toMessage(ScrapedEvent e, UUID runId) {
         return new ScrapedEventMessage(
                 e.title(), e.startDate(), e.endDate(), e.city(), e.venue(),
                 e.category(), e.sourceUrl(), e.sourceName(), e.organizerName(),
-                e.registrationUrl(), e.isFree()
+                e.registrationUrl(), e.isFree(), runId
         );
     }
 }

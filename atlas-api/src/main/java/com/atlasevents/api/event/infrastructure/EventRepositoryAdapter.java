@@ -67,8 +67,8 @@ class EventRepositoryAdapter implements EventRepository {
 
         int rows = jdbc.update("""
                 INSERT INTO events (id, title, start_date, end_date, city, category, venue, organizer,
-                                   registration_url, is_free, source, status, created_at, updated_at)
-                VALUES (gen_random_uuid(), ?::jsonb, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, 'upcoming', NOW(), NOW())
+                                   registration_url, is_free, source, status, run_id, created_at, updated_at)
+                VALUES (gen_random_uuid(), ?::jsonb, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, 'upcoming', ?, NOW(), NOW())
                 ON CONFLICT DO NOTHING
                 """,
                 titleJson,
@@ -80,7 +80,8 @@ class EventRepositoryAdapter implements EventRepository {
                 organizer,
                 input.registrationUrl(),
                 input.isFree(),
-                sourceJson
+                sourceJson,
+                input.runId()
         );
         return rows > 0;
     }

@@ -2,6 +2,7 @@ package com.atlasevents.scraper.messaging;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 public record ScrapedEventMessage(
         Map<String, String> title,
@@ -14,5 +15,6 @@ public record ScrapedEventMessage(
         String sourceName,
         String organizerName,
         String registrationUrl,
-        boolean isFree
+        boolean isFree,
+        UUID runId
 ) {}

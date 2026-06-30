@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +34,7 @@ class ScrapeResultConsumerTest {
     void onScrapeResult_validMessage_savesLog() {
         when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         ScrapeResultMessage message = new ScrapeResultMessage(
-                "10times", "https://10times.com", 5, true, null, ZonedDateTime.now());
+                "10times", "https://10times.com", 5, true, null, ZonedDateTime.now(), UUID.randomUUID());
 
         consumer.onScrapeResult(message);
 
@@ -45,7 +46,7 @@ class ScrapeResultConsumerTest {
         when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         ZonedDateTime finishedAt = ZonedDateTime.now().minusHours(1);
         ScrapeResultMessage message = new ScrapeResultMessage(
-                "pcns", "https://pcns.ma", 3, true, null, finishedAt);
+                "pcns", "https://pcns.ma", 3, true, null, finishedAt, UUID.randomUUID());
 
         consumer.onScrapeResult(message);
 
@@ -59,7 +60,7 @@ class ScrapeResultConsumerTest {
         when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         ZonedDateTime before = ZonedDateTime.now().minusSeconds(1);
         ScrapeResultMessage message = new ScrapeResultMessage(
-                "10times", "https://10times.com", 2, true, null, null);
+                "10times", "https://10times.com", 2, true, null, null, UUID.randomUUID());
 
         consumer.onScrapeResult(message);
 
@@ -73,7 +74,7 @@ class ScrapeResultConsumerTest {
         when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         ScrapeResultMessage message = new ScrapeResultMessage(
                 "allconferencealert", "https://allconferencealert.com", 0,
-                false, "Connection timeout", ZonedDateTime.now());
+                false, "Connection timeout", ZonedDateTime.now(), UUID.randomUUID());
 
         consumer.onScrapeResult(message);
 
@@ -90,7 +91,7 @@ class ScrapeResultConsumerTest {
         when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         ZonedDateTime finishedAt = ZonedDateTime.now();
         ScrapeResultMessage message = new ScrapeResultMessage(
-                "pcns", "https://pcns.ma", 10, true, null, finishedAt);
+                "pcns", "https://pcns.ma", 10, true, null, finishedAt, UUID.randomUUID());
 
         consumer.onScrapeResult(message);
 
@@ -104,7 +105,7 @@ class ScrapeResultConsumerTest {
     void onScrapeResult_setsSourceAndUrl() {
         when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         ScrapeResultMessage message = new ScrapeResultMessage(
-                "pcns", "https://www.pcns.ma/evenements.aspx", 7, true, null, ZonedDateTime.now());
+                "pcns", "https://www.pcns.ma/evenements.aspx", 7, true, null, ZonedDateTime.now(), UUID.randomUUID());
 
         consumer.onScrapeResult(message);
 
@@ -112,5 +113,19 @@ class ScrapeResultConsumerTest {
         verify(scrapeLogRepository).save(captor.capture());
         assertThat(captor.getValue().source()).isEqualTo("pcns");
         assertThat(captor.getValue().url()).isEqualTo("https://www.pcns.ma/evenements.aspx");
+    }
+
+    @Test
+    void onScrapeResult_setsRunIdFromMessage() {
+        when(scrapeLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        UUID runId = UUID.randomUUID();
+        ScrapeResultMessage message = new ScrapeResultMessage(
+                "eventbrite", "https://www.eventbrite.com", 19, true, null, ZonedDateTime.now(), runId);
+
+        consumer.onScrapeResult(message);
+
+        ArgumentCaptor<ScrapeLog> captor = ArgumentCaptor.forClass(ScrapeLog.class);
+        verify(scrapeLogRepository).save(captor.capture());
+        assertThat(captor.getValue().runId()).isEqualTo(runId);
     }
 }

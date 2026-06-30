@@ -36,7 +36,8 @@ public class ScrapeResultConsumer {
                 message.eventsFound(),
                 0,
                 message.success(),
-                message.errorMessage()
+                message.errorMessage(),
+                message.runId()
         );
         scrapeLogRepository.save(scrapeLog);
 
