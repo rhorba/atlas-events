@@ -18,7 +18,7 @@ data:
       - job_name: atlas-api
         metrics_path: /actuator/prometheus
         static_configs:
-          - targets: [atlas-api-service.atlas-events.svc.cluster.local:8080]
+          - targets: [atlas-api.atlas-events.svc.cluster.local:8080]
         relabel_configs:
           - target_label: app
             replacement: atlas-api

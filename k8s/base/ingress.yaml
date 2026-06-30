@@ -21,21 +21,21 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: atlas-api-service
+                name: atlas-api
                 port:
                   number: 8080
           - path: /ical
             pathType: Prefix
             backend:
               service:
-                name: atlas-api-service
+                name: atlas-api
                 port:
                   number: 8080
           - path: /actuator/
             pathType: Prefix
             backend:
               service:
-                name: atlas-api-service
+                name: atlas-api
                 port:
                   number: 8080
           - path: /

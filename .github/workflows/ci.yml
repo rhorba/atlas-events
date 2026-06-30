@@ -266,6 +266,10 @@ jobs:
         run: |
           kubectl get pods -n atlas-events -o wide
           kubectl describe pods -l app=atlas-web -n atlas-events
+          echo "--- atlas-web logs (current) ---"
+          kubectl logs -l app=atlas-web -n atlas-events --tail=50 2>/dev/null || true
+          echo "--- atlas-web logs (previous container) ---"
+          kubectl logs -l app=atlas-web -n atlas-events --previous --tail=50 2>/dev/null || true
       - name: Delete k3d cluster (staging)
         if: always()
         run: k3d cluster delete staging
@@ -338,6 +342,10 @@ jobs:
         run: |
           kubectl get pods -n atlas-events -o wide
           kubectl describe pods -l app=atlas-web -n atlas-events
+          echo "--- atlas-web logs (current) ---"
+          kubectl logs -l app=atlas-web -n atlas-events --tail=50 2>/dev/null || true
+          echo "--- atlas-web logs (previous container) ---"
+          kubectl logs -l app=atlas-web -n atlas-events --previous --tail=50 2>/dev/null || true
       - name: Delete k3d cluster (prod)
         if: always()
         run: k3d cluster delete prod
