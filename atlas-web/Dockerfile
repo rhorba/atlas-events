@@ -14,16 +14,15 @@ RUN npm run build -- --configuration production
 
 # ── Stage 2: Serve with nginx ─────────────────────────────────────────────────
 FROM nginx:1.27-alpine AS runtime
-RUN addgroup -S atlas && adduser -S atlas -G atlas
 
 COPY --from=build /app/dist/atlas-web/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# nginx needs to write its tmp files
-RUN chown -R atlas:atlas /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
-    && touch /var/run/nginx.pid && chown atlas:atlas /var/run/nginx.pid
+# nginx user (uid 101) needs write access to cache/log/pid dirs
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
+    && touch /var/run/nginx.pid && chown nginx:nginx /var/run/nginx.pid
 
-USER atlas
-EXPOSE 80
+USER nginx
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
