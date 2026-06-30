@@ -1,5 +1,21 @@
 ﻿# METRICS — Atlas Events
 
+## Sprint 8 — 2026-06-30
+| Metric | Value | Gate | Status |
+|---|---|---|---|
+| Dockerfiles | 3 (api, scraper, web) | Story 5.1 | ✓ |
+| docker-compose services | 5 (postgres, rabbitmq, atlas-api, atlas-scraper, atlas-web) | Story 5.1 | ✓ |
+| k8s base manifests | 11 files (namespace, 3×deploy, 3×svc/configmap, ingress, networkpolicy, cronjob, kustomization) | Story 5.2 | ✓ |
+| k8s overlays | 2 (staging + prod) with replica + resource patches | Story 5.2 | ✓ |
+| CI jobs added | build-images (matrix 3 services), deploy-staging, deploy-prod, test-e2e | Story 5.3 | ✓ |
+| Playwright specs | 5 (event-list, event-detail, submit, admin-login, accessibility) | Story 5.4 | ✓ |
+| axe-core WCAG scan | WCAG 2.0 A + AA, 3 pages | Story 5.4 | ✓ |
+| DEPLOY.md sections | 8 (prereqs, first-time setup, CI/CD, manual deploy, smoke test, rollback, secrets, scrape trigger) | Story 5.5 | ✓ |
+| Branch | feature/sprint-8 (new — not sprint-5) | User requirement | ✓ |
+| Checkov compliance | non-root, resource limits, liveness/readiness probes, no :latest in k8s, drop ALL caps | Story 5.2 | ✓ |
+| Compile errors | 0 | 0 | ✓ |
+| Stories complete | 5.1 + 5.2 + 5.3 + 5.4 + 5.5 | Sprint 8 | ✓ |
+
 ## Sprint 7 — 2026-06-30
 | Metric | Value | Gate | Status |
 |---|---|---|---|

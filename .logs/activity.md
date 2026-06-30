@@ -1,5 +1,22 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PHASE: SHIP (Sprint 8)
+**Branch**: feature/sprint-8 (new branch — user requested separate from feature/sprint-5)
+**Stories**: 5.1 (Dockerfiles), 5.2 (k8s Kustomize), 5.3 (CI/CD pipeline), 5.4 (Playwright E2E), 5.5 (DEPLOY.md)
+**Pushed**: git push origin feature/sprint-8 ✓ (new branch, first push)
+- atlas-api/Dockerfile: multi-stage Maven 3.9/Eclipse Temurin 21 → JRE 21 alpine, non-root user atlas (UID 1000)
+- atlas-scraper/Dockerfile: same pattern, EXPOSE 8081
+- atlas-web/Dockerfile: Node 20 alpine build (npm ci --legacy-peer-deps, ng build production) → nginx:1.27-alpine, non-root user atlas
+- atlas-web/nginx.conf: security headers (X-Frame-Options, CSP, nosniff, Referrer-Policy), /api/ proxy to atlas-api:8080, SPA fallback, static asset cache headers
+- docker-compose.yml: all 5 services (postgres, rabbitmq, atlas-api, atlas-scraper, atlas-web) with healthchecks + depends_on conditions
+- k8s/base/: namespace, atlas-api (deployment/service/configmap), atlas-scraper (deployment/configmap), atlas-web (deployment/service), ingress, networkpolicy, cronjob
+- k8s/overlays/staging/: replica-patch (1/1/1) + ingress-patch (staging.atlas-events.ma)
+- k8s/overlays/prod/: replica-patch (3/1/2) + resources-patch (higher limits) + ingress-patch (atlas-events.ma)
+- ci.yml: build-images job (docker buildx matrix → GHCR, SHA + latest tags), deploy-staging (auto), deploy-prod (manual Environment approval), test-e2e job (Playwright, continue-on-error)
+- Playwright E2E: event-list.spec.ts, event-detail.spec.ts, submit.spec.ts, admin-login.spec.ts, accessibility.spec.ts (axe-core WCAG 2.0 A/AA scan)
+- playwright.config.ts, package.json scripts: e2e + e2e:ci
+- DEPLOY.md: full production runbook (prerequisites, first-time setup, CI/CD pipeline, manual deploy, smoke tests, rollback A/B, secret rotation, manual scrape trigger)
+
 ## 2026-06-30 — PHASE: SHIP (Sprint 7)
 **Branch**: feature/sprint-5
 **Stories**: 4.1 (Admin login), 4.2 (Submission moderation), 4.3 (Event management), 4.4 (Scraper health dashboard)
