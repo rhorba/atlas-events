@@ -31,6 +31,7 @@ public class SubmissionService {
                 command.eventUrl(),
                 command.isFree(),
                 SubmissionStatus.PENDING,
+                null,
                 ZonedDateTime.now()
         );
         return repository.save(submission).id();

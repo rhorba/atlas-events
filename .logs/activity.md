@@ -1,5 +1,23 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PHASE: SHIP (Sprint 7)
+**Branch**: feature/sprint-5
+**Stories**: 4.1 (Admin login), 4.2 (Submission moderation), 4.3 (Event management), 4.4 (Scraper health dashboard)
+**Pushed**: git push origin feature/sprint-5 ✓ | **CI**: GREEN ✓
+- V006 migration: `review_note TEXT` column on event_submissions
+- AdminSubmissionController: GET /api/v1/admin/submissions?status=PENDING, PATCH approve/reject
+- AdminEventController: GET/PUT/DELETE /api/v1/admin/events/{id} with soft-delete
+- AdminEventUpdateCommand domain record; EventRepository + EventRepositoryAdapter extended
+- SubmissionRepository extended: findByStatus, findById, updateStatus
+- Angular AuthService (sessionStorage JWT), AdminService (full API client)
+- authInterceptor (functional): Bearer token on /admin/* requests
+- adminGuard (functional CanActivateFn)
+- AdminLoginComponent, AdminSubmissionsComponent, AdminEventsComponent, AdminScrapeComponent
+- Admin routes lazy-loaded + guarded in app.routes.ts
+- i18n: admin.* keys in fr.json + ar.json
+- Coverage: 94.94% stmts / 84.26% branches / 95.23% funcs — all gates met
+- Tests: 124/124 (18 suites)
+
 ## 2026-06-30 — PHASE: SHIP (Sprint 6)
 **Branch**: feature/sprint-5
 **Stories**: 3.3 (Event detail page), 3.4 (Calendar view), 3.5 (Submit event form)

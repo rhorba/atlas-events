@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'events', pathMatch: 'full' },
@@ -30,5 +31,37 @@ export const routes: Routes = [
         (m) => m.SubmitFormComponent
       ),
   },
+  {
+    path: 'admin/login',
+    loadComponent: () =>
+      import('./features/admin/login/admin-login.component').then(
+        (m) => m.AdminLoginComponent
+      ),
+  },
+  {
+    path: 'admin/submissions',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/submissions/admin-submissions.component').then(
+        (m) => m.AdminSubmissionsComponent
+      ),
+  },
+  {
+    path: 'admin/events',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/events/admin-events.component').then(
+        (m) => m.AdminEventsComponent
+      ),
+  },
+  {
+    path: 'admin/scrape',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/scrape/admin-scrape.component').then(
+        (m) => m.AdminScrapeComponent
+      ),
+  },
+  { path: 'admin', redirectTo: 'admin/submissions', pathMatch: 'full' },
   { path: '**', redirectTo: 'events' },
 ];

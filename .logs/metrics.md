@@ -1,5 +1,21 @@
 ﻿# METRICS — Atlas Events
 
+## Sprint 7 — 2026-06-30
+| Metric | Value | Gate | Status |
+|---|---|---|---|
+| atlas-web Jest tests | 124 (18 suites) | ≥ 80% cov | ✓ |
+| atlas-web statement coverage | 94.94% | ≥ 80% | ✓ |
+| atlas-web branch coverage | 84.26% | ≥ 80% | ✓ |
+| atlas-web function coverage | 95.23% | ≥ 80% | ✓ |
+| atlas-web line coverage | 96.09% | ≥ 80% | ✓ |
+| New API endpoints | 6 (admin submissions + events) | Stories 4.2–4.3 | ✓ |
+| New Angular components | AdminLoginComponent, AdminSubmissionsComponent, AdminEventsComponent, AdminScrapeComponent | Stories 4.1–4.4 | ✓ |
+| JWT auth flow | AuthService + authInterceptor + adminGuard | Story 4.1 | ✓ |
+| Flyway migration | V006: review_note column | Story 4.2 | ✓ |
+| CI run | GREEN 2m23s | — | ✓ |
+| Compile errors | 0 | 0 | ✓ |
+| Stories complete | 4.1 + 4.2 + 4.3 + 4.4 | Sprint 7 | ✓ |
+
 ## Sprint 6 — 2026-06-30
 | Metric | Value | Gate | Status |
 |---|---|---|---|

@@ -44,3 +44,44 @@ export interface SubmissionRequest {
   contactEmail?: string;
   description?: string;
 }
+
+export interface AdminSubmission {
+  id: string;
+  title: string;
+  city: string;
+  organizerName: string;
+  startDate: string;
+  eventUrl?: string;
+  contactEmail?: string;
+  isFree: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reviewNote?: string;
+  createdAt: string;
+}
+
+export interface AdminEvent {
+  id: string;
+  title: { fr?: string; ar?: string };
+  startDate: string;
+  endDate?: string;
+  city: string;
+  category: string;
+  organizer: string;
+  registrationUrl?: string;
+  venue?: string;
+  isFree: boolean;
+  status: string;
+  deletedAt?: string;
+}
+
+export interface ScrapeLog {
+  id: string;
+  source: string;
+  url: string;
+  eventsFound: number;
+  eventsInserted: number;
+  success: boolean;
+  errorMessage?: string;
+  startedAt: string;
+  finishedAt: string;
+}

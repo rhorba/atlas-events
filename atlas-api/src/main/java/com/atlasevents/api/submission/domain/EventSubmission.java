@@ -16,5 +16,6 @@ public record EventSubmission(
         String eventUrl,
         boolean isFree,
         SubmissionStatus status,
+        String reviewNote,
         ZonedDateTime createdAt
 ) {}
