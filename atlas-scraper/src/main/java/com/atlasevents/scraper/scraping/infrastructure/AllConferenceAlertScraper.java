@@ -56,7 +56,10 @@ public class AllConferenceAlertScraper implements EventScraper {
             return List.of();
         }
         log.info("Scraping AllConferenceAlert: {}", url);
-        Document doc = Jsoup.connect(url).timeout(properties.httpTimeoutMs()).get();
+        Document doc = Jsoup.connect(url)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                .header("Accept-Language", "fr-MA,fr;q=0.9,en;q=0.8")
+                .timeout(properties.httpTimeoutMs()).get();
         return parseDocument(doc, url);
     }
 

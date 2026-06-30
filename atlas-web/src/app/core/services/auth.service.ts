@@ -10,8 +10,8 @@ export class AuthService {
   private readonly TOKEN_KEY = 'atlas_admin_token';
 
   login(username: string, password: string): Observable<void> {
-    return this.http.post<{ token: string }>(`${this.base}/login`, { username, password }).pipe(
-      tap(res => sessionStorage.setItem(this.TOKEN_KEY, res.token)),
+    return this.http.post<{ data: { token: string } }>(`${this.base}/login`, { username, password }).pipe(
+      tap(res => sessionStorage.setItem(this.TOKEN_KEY, res.data.token)),
       map(() => void 0)
     );
   }
