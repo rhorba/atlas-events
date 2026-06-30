@@ -9,6 +9,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -31,7 +33,7 @@ public class ScrapeTasklet implements Tasklet {
     public ScrapeTasklet(EventScraper scraper, RabbitTemplate rabbitTemplate, MeterRegistry meterRegistry) {
         this.scraper = scraper;
         this.rabbitTemplate = rabbitTemplate;
-        String source = scraper.getSourceName();
+        String source = Objects.requireNonNullElse(scraper.getSourceName(), "unknown");
         this.eventsFound = Counter.builder("atlas.scraper.events.found")
                 .description("Total events found by scraper")
                 .tag("source", source)
