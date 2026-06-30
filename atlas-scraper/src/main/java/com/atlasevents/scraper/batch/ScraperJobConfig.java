@@ -1,8 +1,6 @@
 package com.atlasevents.scraper.batch;
 
-import com.atlasevents.scraper.scraping.infrastructure.AllConferenceAlertScraper;
-import com.atlasevents.scraper.scraping.infrastructure.PcnsScraper;
-import com.atlasevents.scraper.scraping.infrastructure.TentimesScraper;
+import com.atlasevents.scraper.scraping.infrastructure.EventbriteScraper;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.batch.core.Job;
@@ -18,60 +16,24 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class ScraperJobConfig {
 
     @Bean
-    public ScrapeTasklet tentimesTasklet(TentimesScraper scraper, RabbitTemplate rabbitTemplate,
-                                          MeterRegistry meterRegistry) {
+    public ScrapeTasklet eventbriteTasklet(EventbriteScraper scraper, RabbitTemplate rabbitTemplate,
+                                           MeterRegistry meterRegistry) {
         return new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
     }
 
     @Bean
-    public ScrapeTasklet allConferenceAlertTasklet(AllConferenceAlertScraper scraper,
-                                                    RabbitTemplate rabbitTemplate,
-                                                    MeterRegistry meterRegistry) {
-        return new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
-    }
-
-    @Bean
-    public ScrapeTasklet pcnsTasklet(PcnsScraper scraper, RabbitTemplate rabbitTemplate,
-                                      MeterRegistry meterRegistry) {
-        return new ScrapeTasklet(scraper, rabbitTemplate, meterRegistry);
-    }
-
-    @Bean
-    public Step tentimesStep(JobRepository jobRepository,
-                              PlatformTransactionManager transactionManager,
-                              ScrapeTasklet tentimesTasklet) {
-        return new StepBuilder("tentimesStep", jobRepository)
-                .tasklet(tentimesTasklet, transactionManager)
+    public Step eventbriteStep(JobRepository jobRepository,
+                               PlatformTransactionManager transactionManager,
+                               ScrapeTasklet eventbriteTasklet) {
+        return new StepBuilder("eventbriteStep", jobRepository)
+                .tasklet(eventbriteTasklet, transactionManager)
                 .build();
     }
 
     @Bean
-    public Step allConferenceAlertStep(JobRepository jobRepository,
-                                        PlatformTransactionManager transactionManager,
-                                        ScrapeTasklet allConferenceAlertTasklet) {
-        return new StepBuilder("allConferenceAlertStep", jobRepository)
-                .tasklet(allConferenceAlertTasklet, transactionManager)
-                .build();
-    }
-
-    @Bean
-    public Step pcnsStep(JobRepository jobRepository,
-                          PlatformTransactionManager transactionManager,
-                          ScrapeTasklet pcnsTasklet) {
-        return new StepBuilder("pcnsStep", jobRepository)
-                .tasklet(pcnsTasklet, transactionManager)
-                .build();
-    }
-
-    @Bean
-    public Job scraperJob(JobRepository jobRepository,
-                           Step tentimesStep,
-                           Step allConferenceAlertStep,
-                           Step pcnsStep) {
+    public Job scraperJob(JobRepository jobRepository, Step eventbriteStep) {
         return new JobBuilder("scraperJob", jobRepository)
-                .start(tentimesStep)
-                .next(allConferenceAlertStep)
-                .next(pcnsStep)
+                .start(eventbriteStep)
                 .build();
     }
 }

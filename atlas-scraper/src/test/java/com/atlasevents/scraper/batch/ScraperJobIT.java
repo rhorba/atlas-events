@@ -1,9 +1,7 @@
 package com.atlasevents.scraper.batch;
 
 import com.atlasevents.scraper.scraping.domain.ScrapedEvent;
-import com.atlasevents.scraper.scraping.infrastructure.AllConferenceAlertScraper;
-import com.atlasevents.scraper.scraping.infrastructure.PcnsScraper;
-import com.atlasevents.scraper.scraping.infrastructure.TentimesScraper;
+import com.atlasevents.scraper.scraping.infrastructure.EventbriteScraper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
@@ -40,13 +38,7 @@ class ScraperJobIT {
     static RabbitMQContainer rabbitmq = new RabbitMQContainer("rabbitmq:3-management-alpine");
 
     @MockBean
-    private TentimesScraper tentimesScraper;
-
-    @MockBean
-    private AllConferenceAlertScraper allConferenceAlertScraper;
-
-    @MockBean
-    private PcnsScraper pcnsScraper;
+    private EventbriteScraper eventbriteScraper;
 
     @Autowired
     private JobLauncher jobLauncher;
@@ -56,17 +48,13 @@ class ScraperJobIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        when(tentimesScraper.getSourceName()).thenReturn("10times");
-        when(tentimesScraper.getTargetUrl()).thenReturn("https://10times.com/morocco");
-        when(tentimesScraper.scrape()).thenReturn(List.of(sampleEvent("casablanca")));
-
-        when(allConferenceAlertScraper.getSourceName()).thenReturn("allconferencealert");
-        when(allConferenceAlertScraper.getTargetUrl()).thenReturn("https://www.allconferencealert.com/morocco.html");
-        when(allConferenceAlertScraper.scrape()).thenReturn(List.of(sampleEvent("rabat")));
-
-        when(pcnsScraper.getSourceName()).thenReturn("pcns");
-        when(pcnsScraper.getTargetUrl()).thenReturn("https://www.pcns.ma/evenements.aspx");
-        when(pcnsScraper.scrape()).thenReturn(List.of(sampleEvent("marrakech")));
+        when(eventbriteScraper.getSourceName()).thenReturn("eventbrite");
+        when(eventbriteScraper.getTargetUrl()).thenReturn("https://www.eventbrite.com");
+        when(eventbriteScraper.scrape()).thenReturn(List.of(
+                sampleEvent("casablanca"),
+                sampleEvent("rabat"),
+                sampleEvent("marrakech")
+        ));
     }
 
     @Test
@@ -78,18 +66,18 @@ class ScraperJobIT {
         JobExecution execution = jobLauncher.run(scraperJob, params);
 
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-        assertThat(execution.getStepExecutions()).hasSize(3);
+        assertThat(execution.getStepExecutions()).hasSize(1);
     }
 
     @Test
-    void scraperJob_allStepsCompleted() throws Exception {
+    void scraperJob_eventbriteStepCompleted() throws Exception {
         JobExecution execution = jobLauncher.run(scraperJob, new JobParametersBuilder()
                 .addLong("run.id", System.currentTimeMillis())
                 .toJobParameters());
 
         assertThat(execution.getStepExecutions())
                 .extracting(StepExecution::getStepName)
-                .containsExactlyInAnyOrder("tentimesStep", "allConferenceAlertStep", "pcnsStep");
+                .containsExactlyInAnyOrder("eventbriteStep");
 
         assertThat(execution.getStepExecutions())
                 .allMatch(step -> step.getStatus() == BatchStatus.COMPLETED);
@@ -100,7 +88,7 @@ class ScraperJobIT {
                 Map.of("fr", "Test Event " + city),
                 ZonedDateTime.now(ZoneId.of("Africa/Casablanca")).plusDays(7),
                 null, city, null, "technology",
-                "https://example.com/" + city, "test", null, null, false
+                "https://www.eventbrite.com/e/" + city, "eventbrite", null, null, false
         );
     }
 }

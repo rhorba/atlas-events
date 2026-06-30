@@ -4,9 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "atlas.scraper")
 public record AppProperties(
-        String tentimesUrl,
-        String allConferenceAlertUrl,
-        String pcnsUrl,
+        String eventbriteBaseUrl,
         int httpTimeoutMs,
         boolean robotsCheckEnabled
 ) {}
