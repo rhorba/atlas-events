@@ -14,4 +14,4 @@ resources:
   - ingress.yaml
   - networkpolicy.yaml
   - cronjob.yaml
-  - monitoring/kustomization.yaml
+  - monitoring
