@@ -1,5 +1,6 @@
 package com.atlasevents.api.auth;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,14 @@ class AuthControllerIT {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private LoginRateLimiter rateLimiter;
+
+    @BeforeEach
+    void resetRateLimiter() {
+        rateLimiter.reset("127.0.0.1");
+    }
 
     @Test
     void login_validCredentials_returnsJwtToken() {
@@ -115,6 +124,27 @@ class AuthControllerIT {
                 "/api/v1/admin/submissions", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void login_after10FailedAttempts_returns429() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String badBody = """
+                {"username": "admin", "password": "wrong"}
+                """;
+
+        for (int i = 0; i < 10; i++) {
+            restTemplate.postForEntity("/api/v1/auth/login", new HttpEntity<>(badBody, headers), String.class);
+        }
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "/api/v1/auth/login",
+                new HttpEntity<>(badBody, headers),
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(response.getBody()).contains("15 minutes");
     }
 
     private String obtainToken() {

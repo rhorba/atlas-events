@@ -64,9 +64,34 @@ jobs:
           path: atlas-scraper/target/site/jacoco/
           retention-days: 14
 
+  # ── Stage 1b: Test Angular (atlas-web) ─────────────────────────────────────
+  test-web:
+    needs: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: atlas-web/package-lock.json
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: atlas-web
+      - name: Run tests + coverage gate (atlas-web)
+        run: npm run test:ci
+        working-directory: atlas-web
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage
+          path: atlas-web/coverage/
+          retention-days: 14
+
   # ── Stage 2: Security scan ──────────────────────────────────────────────────
   security-scan:
-    needs: [test-api, test-scraper]
+    needs: [test-api, test-scraper, test-web]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

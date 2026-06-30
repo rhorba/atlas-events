@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "events": "Événements",
+    "calendar": "Calendrier",
+    "submit": "Soumettre un événement",
+    "language": "Langue"
+  },
+  "events": {
+    "title": "Événements au Maroc",
+    "filters": {
+      "city": "Ville",
+      "category": "Catégorie",
+      "range": "Période",
+      "all_cities": "Toutes les villes",
+      "all_categories": "Toutes les catégories",
+      "range_week": "Cette semaine",
+      "range_month": "Ce mois",
+      "range_all": "Toutes les dates",
+      "reset": "Réinitialiser les filtres"
+    },
+    "card": {
+      "free": "Gratuit",
+      "register": "S'inscrire",
+      "add_calendar": "Ajouter au calendrier"
+    },
+    "empty": {
+      "title": "Aucun événement trouvé",
+      "message": "Aucun événement ne correspond à vos filtres.",
+      "reset": "Réinitialiser les filtres"
+    },
+    "loading": "Chargement des événements..."
+  },
+  "categories": {
+    "technology": "Technologie",
+    "science": "Science",
+    "business": "Business",
+    "startup": "Startup",
+    "arts": "Arts & Culture",
+    "policy": "Politique",
+    "health": "Santé",
+    "education": "Éducation",
+    "other": "Autre"
+  },
+  "cities": {
+    "casablanca": "Casablanca",
+    "rabat": "Rabat",
+    "marrakech": "Marrakech",
+    "fes": "Fès",
+    "tanger": "Tanger",
+    "agadir": "Agadir",
+    "meknes": "Meknès",
+    "oujda": "Oujda"
+  },
+  "submit": {
+    "title": "Soumettre votre événement",
+    "success": "Votre événement a été soumis. Il sera examiné dans les 24 heures.",
+    "submit_another": "Soumettre un autre événement",
+    "rate_limit": "Trop de soumissions — réessayez dans une heure"
+  },
+  "errors": {
+    "load_failed": "Impossible de charger les événements. Veuillez réessayer.",
+    "not_found": "Événement introuvable."
+  }
+}
