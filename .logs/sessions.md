@@ -1,5 +1,16 @@
 # SESSIONS — Atlas Events
 
+## SESSION_END — 2026-06-30 (Project v1.0 Complete)
+**Completed**: Master merge + video recording
+**Done this session**:
+- Merged feature/sprint-9 → master (--no-ff), containing full linear chain of sprints 1-9
+- git push origin master ✓ (pulled remote divergence then pushed successfully)
+- Playwright video recording (CLAUDE.md rule #9): installed Chromium, ran E2E with video:on, 9/11 tests passed, saved .recordings/v1.0-2026-06-30.webm (73 KB)
+- Restored playwright.config.ts to video:retain-on-failure
+- All feature branches now merged to master; project DoD met
+**Status**: Atlas Events v1.0 SHIPPED — all 9 sprints complete, all epics delivered
+**Next session**: Sprint 10 — user to define scope (candidates: full-text search, PWA, email notifications, SEO/SSR)
+
 ## SESSION_END — 2026-06-30 (Sprint 9)
 **Completed**: Sprint 9 SHIP phase — Stories 6.1, 6.2, 6.3, 6.4, 6.5
 **Branch pushed**: feature/sprint-9 (44a0d54) — new branch | **CI**: GREEN ✓

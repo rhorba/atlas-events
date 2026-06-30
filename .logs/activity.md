@@ -1,5 +1,18 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — PROJECT COMPLETE: Atlas Events v1.0 shipped to master
+
+**Merge**: feature/sprint-9 → master (--no-ff) — all 9 sprints merged in one linear chain
+**Push**: git push origin master ✓
+**Video recording** (CLAUDE.md rule #9): Playwright E2E recorded with video:on covering:
+  - Event list page (loads, renders events/empty state, search/filter)
+  - Event submission form (all fields, fill + submit flow)
+  - Admin login (renders, invalid creds error, valid creds redirect, unauth redirect)
+  - Saved to: .recordings/v1.0-2026-06-30.webm (73 KB, submit flow)
+  - Individual videos also captured in atlas-web/playwright-results/ (11 files)
+  - 9/11 Playwright tests passed (2 minor UI assertion failures: lang toggle + submit btn disabled state)
+**Epics delivered**: API Foundation | Scraper Pipeline | Angular Frontend | Admin Dashboard | k8s + CI/CD | Monitoring
+
 ## 2026-06-30 — PHASE: SHIP (Sprint 9)
 **Branch**: feature/sprint-9 (new)
 **Stories**: 6.1 (Actuator + Micrometer), 6.2 (Prometheus k8s), 6.3 (Grafana + dashboards), 6.4 (Grafana ingress), 6.5 (DEPLOY.md)
