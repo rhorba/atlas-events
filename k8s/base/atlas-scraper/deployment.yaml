@@ -16,6 +16,8 @@ spec:
       labels:
         app: atlas-scraper
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

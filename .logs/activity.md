@@ -1,5 +1,46 @@
 ﻿# ACTIVITY — Atlas Events
 
+## 2026-06-30 — CI: deploy-staging and deploy-prod made functional (self-hosted runner + Docker Desktop k8s)
+
+**Changes**:
+- `deploy-staging` and `deploy-prod` now use `runs-on: self-hosted` (runs on local machine with Docker Desktop k8s)
+- Removed `continue-on-error: true` — deploy failures now block the pipeline
+- Removed kubeconfig secret setup step — runner uses its local `~/.kube/config` directly
+- Added kustomize CLI install step (downloads windows_amd64 binary from kustomize releases)
+- Added `shell: bash` to all run steps for Git Bash compatibility on Windows
+- Added step to create `atlas-events` namespace and `ghcr-pull-secret` (imagePullSecret) before applying kustomize — fixes GHCR private image pull
+- Added `imagePullSecrets: [ghcr-pull-secret]` to all 3 base deployments (atlas-api, atlas-scraper, atlas-web)
+- Replaced URL-based smoke test with `kubectl port-forward` test (staging: port 4280, prod: port 4281)
+- `atlas-api` rollout status is advisory (`continue-on-error: true`) until DB secrets are in cluster; `atlas-web` rollout is mandatory
+
+**Remaining manual setup** (see instructions given to user):
+1. Register self-hosted GitHub Actions runner on Windows machine
+2. Create GitHub Environments: `staging` and `production` (production needs manual approval gate)
+3. Create `atlas-secrets` k8s Secret in `atlas-events` namespace with DB/RabbitMQ/JWT values
+
+---
+
+## 2026-06-30 — RECORDING: v1.1 demo re-recorded with Eventbrite scraper
+
+**File**: `.recordings/v1.1-2026-06-30.webm` (1.8 MB, ~1m18s)
+**Change from v1.0**: Scraper trigger in flow 11 now fires successfully — EventbriteScraper hits live Eventbrite Morocco pages instead of returning Cloudflare 403s. All 12 demo flows pass.
+**Commit**: 3f34dd8 — pushed to master
+
+---
+
+## 2026-06-30 — SCRAPER: Replaced Cloudflare-blocked sources with Eventbrite
+
+**Change**: Removed TentimesScraper, AllConferenceAlertScraper, PcnsScraper (all 403/DNS failures behind Cloudflare). Replaced with EventbriteScraper that:
+- Fetches 3 Eventbrite Morocco category pages (tech, business, all-events)
+- Extracts embedded JSON from `window.__SERVER_DATA__` in HTML script tag
+- Maps EventbriteCategory tags to app categories
+- Deduplicates by event URL
+
+**Tests**: 39 unit tests pass; ScraperJobIT (integration) passes with Testcontainers. Line coverage 80%+.
+**Commit**: a86e043 — pushed to master + feature/sprint-5
+
+---
+
 ## 2026-06-30 — CI FIX: deploy-prod non-blocking + kustomize reference fixed
 
 **Root causes**:

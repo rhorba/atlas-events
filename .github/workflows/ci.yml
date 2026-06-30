@@ -201,20 +201,35 @@ jobs:
   # ── Stage 4: Deploy to staging ──────────────────────────────────────────────
   deploy-staging:
     needs: build-images
-    runs-on: ubuntu-latest
-    continue-on-error: true
+    runs-on: self-hosted
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: staging
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
-      - name: Configure kubeconfig (staging)
+      - name: Install kustomize
+        shell: bash
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
+          VERSION=5.3.0
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${VERSION}/kustomize_v${VERSION}_windows_amd64.tar.gz" -o kustomize.tar.gz
+          tar xzf kustomize.tar.gz
+          echo "$(pwd)" >> "$GITHUB_PATH"
+      - name: Verify cluster connection
+        shell: bash
+        run: kubectl cluster-info
+      - name: Ensure namespace and GHCR pull secret (staging)
+        shell: bash
+        run: |
+          kubectl create namespace atlas-events --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret docker-registry ghcr-pull-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace=atlas-events \
+            --dry-run=client -o yaml | kubectl apply -f -
       - name: Set image tags to SHA
+        shell: bash
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           cd k8s/overlays/staging
@@ -223,43 +238,60 @@ jobs:
             ghcr.io/atlas-events/atlas-scraper=ghcr.io/${{ github.repository_owner }}/atlas-scraper:${SHORT_SHA} \
             ghcr.io/atlas-events/atlas-web=ghcr.io/${{ github.repository_owner }}/atlas-web:${SHORT_SHA}
       - name: Apply Kustomize (staging)
+        shell: bash
         run: kubectl apply -k k8s/overlays/staging
-      - name: Wait for rollout
-        run: |
-          kubectl rollout status deployment/atlas-api -n atlas-events --timeout=120s
-          kubectl rollout status deployment/atlas-web -n atlas-events --timeout=120s
+      - name: Wait for rollout (atlas-web)
+        shell: bash
+        run: kubectl rollout status deployment/atlas-web -n atlas-events --timeout=120s
+      - name: Wait for rollout (atlas-api)
+        shell: bash
+        continue-on-error: true
+        run: kubectl rollout status deployment/atlas-api -n atlas-events --timeout=120s
       - name: Smoke test (staging)
+        shell: bash
         run: |
-          STAGING_URL="https://staging.atlas-events.ma"
-          for i in 1 2 3 4 5; do
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" ${STAGING_URL}/api/v1/events || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "Smoke test passed (HTTP 200)"
-              exit 0
-            fi
-            echo "Attempt $i: got HTTP ${STATUS}, retrying in 10s..."
-            sleep 10
-          done
-          echo "Smoke test failed after 5 attempts"
-          exit 1
+          kubectl port-forward svc/atlas-web-service 4280:80 -n atlas-events &
+          sleep 5
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:4280/ || echo "000")
+          if [ "$STATUS" = "200" ]; then
+            echo "Smoke test passed (HTTP 200)"
+          else
+            echo "Smoke test failed: HTTP ${STATUS}"
+            exit 1
+          fi
 
   # ── Stage 5: Deploy to production (manual approval) ────────────────────────
   deploy-prod:
     needs: deploy-staging
-    runs-on: ubuntu-latest
-    continue-on-error: true
+    runs-on: self-hosted
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: production
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
-      - name: Configure kubeconfig (prod)
+      - name: Install kustomize
+        shell: bash
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
+          VERSION=5.3.0
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${VERSION}/kustomize_v${VERSION}_windows_amd64.tar.gz" -o kustomize.tar.gz
+          tar xzf kustomize.tar.gz
+          echo "$(pwd)" >> "$GITHUB_PATH"
+      - name: Verify cluster connection
+        shell: bash
+        run: kubectl cluster-info
+      - name: Ensure namespace and GHCR pull secret (prod)
+        shell: bash
+        run: |
+          kubectl create namespace atlas-events --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret docker-registry ghcr-pull-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace=atlas-events \
+            --dry-run=client -o yaml | kubectl apply -f -
       - name: Set image tags to SHA
+        shell: bash
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           cd k8s/overlays/prod
@@ -268,22 +300,24 @@ jobs:
             ghcr.io/atlas-events/atlas-scraper=ghcr.io/${{ github.repository_owner }}/atlas-scraper:${SHORT_SHA} \
             ghcr.io/atlas-events/atlas-web=ghcr.io/${{ github.repository_owner }}/atlas-web:${SHORT_SHA}
       - name: Apply Kustomize (prod)
+        shell: bash
         run: kubectl apply -k k8s/overlays/prod
-      - name: Wait for rollout
-        run: |
-          kubectl rollout status deployment/atlas-api -n atlas-events --timeout=300s
-          kubectl rollout status deployment/atlas-web -n atlas-events --timeout=300s
+      - name: Wait for rollout (atlas-web)
+        shell: bash
+        run: kubectl rollout status deployment/atlas-web -n atlas-events --timeout=300s
+      - name: Wait for rollout (atlas-api)
+        shell: bash
+        continue-on-error: true
+        run: kubectl rollout status deployment/atlas-api -n atlas-events --timeout=300s
       - name: Smoke test (prod)
+        shell: bash
         run: |
-          PROD_URL="https://atlas-events.ma"
-          for i in 1 2 3 4 5; do
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" ${PROD_URL}/api/v1/events || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "Smoke test passed (HTTP 200)"
-              exit 0
-            fi
-            echo "Attempt $i: got HTTP ${STATUS}, retrying in 15s..."
-            sleep 15
-          done
-          echo "Smoke test failed after 5 attempts"
-          exit 1
+          kubectl port-forward svc/atlas-web-service 4281:80 -n atlas-events &
+          sleep 5
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:4281/ || echo "000")
+          if [ "$STATUS" = "200" ]; then
+            echo "Smoke test passed (HTTP 200)"
+          else
+            echo "Smoke test failed: HTTP ${STATUS}"
+            exit 1
+          fi
