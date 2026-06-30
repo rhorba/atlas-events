@@ -8,7 +8,7 @@ Economic conferences, startup summits, policy forums, and networking events in C
 
 ## Solution
 
-A unified platform covering 5 Moroccan cities: multi-source scraping pipelines, city/category-filtered event listings, FullCalendar view, community event submissions, iCal subscription feeds, and bilingual FR/AR support.
+A unified platform covering 5 Moroccan cities: automated event scraping, city/category-filtered event listings, FullCalendar view, community event submissions, iCal subscription feeds, and bilingual FR/AR support.
 
 ## Stack
 
@@ -28,7 +28,7 @@ A unified platform covering 5 Moroccan cities: multi-source scraping pipelines, 
 ## Services
 
 - **atlas-api** — REST API serving events, iCal feeds, community submissions, and admin endpoints
-- **atlas-scraper** — Spring Batch jobs that scrape event sources and publish to RabbitMQ
+- **atlas-scraper** — Spring Batch job that scrapes Eventbrite's Morocco listings (tech, business, all-events categories) and publishes new events to RabbitMQ for atlas-api to persist; triggered on demand via the admin dashboard, not on a schedule
 - **atlas-web** — Angular SPA served via Nginx
 
 ## Cities
